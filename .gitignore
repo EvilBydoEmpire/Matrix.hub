@@ -1,0 +1,17 @@
+# Arduino and PlatformIO build output
+build/
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Local editor and operating-system files
+.DS_Store
+.vscode/
+*.swp
+*.tmp
+
+# Local credentials and signing material
+secrets.h
+*.pem
+*.key
+
