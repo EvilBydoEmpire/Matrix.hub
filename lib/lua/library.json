@@ -1,0 +1,22 @@
+{
+  "name": "Lua",
+  "version": "5.4.8",
+  "description": "Vendored official Lua runtime for sandboxed matrix patterns",
+  "homepage": "https://www.lua.org/",
+  "license": "MIT",
+  "build": {
+    "srcDir": "src",
+    "srcFilter": [
+      "+<*>",
+      "-<lua.c>",
+      "-<luac.c>",
+      "-<linit.c>",
+      "-<liolib.c>",
+      "-<loslib.c>",
+      "-<loadlib.c>",
+      "-<ldblib.c>",
+      "-<lcorolib.c>"
+    ]
+  }
+}
+

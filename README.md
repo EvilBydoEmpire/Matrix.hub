@@ -44,9 +44,28 @@ The intended platform combines:
 
 Normal playback and control remain entirely local. Internet access is only needed to check for or install pattern and firmware updates.
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/HARDWARE_PROFILES.md`](docs/HARDWARE_PROFILES.md), and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the initial design.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/HARDWARE_PROFILES.md`](docs/HARDWARE_PROFILES.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), and [`docs/STATUS.md`](docs/STATUS.md) for the design and measured implementation status.
 
 ## Project status
 
-Architecture and baseline stabilization. The existing sketch is the reference implementation and should remain usable at every migration step.
+The MatrixPortal S3 reference target now has a pinned PlatformIO build, a first
+`DisplayBackend`, and a sandboxed embedded Lua 5.4.8 runtime. The dashboard's
+**Run Hello Lua** button executes a Lua pattern whose drawing calls are handled
+by the C++ Protomatter backend. The original nine animations remain available
+as fallbacks.
 
+## Build the MatrixPortal reference firmware
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+.venv/bin/pio run -e matrixportal_s3_hub75
+```
+
+The generated firmware is written to
+`.pio/build/matrixportal_s3_hub75/firmware.bin`.
+
+The first build target intentionally uses the board's existing default
+partition table. A custom OTA/LittleFS layout will be selected only after the
+Lua vertical slice has been exercised on hardware and its final firmware size
+is known.

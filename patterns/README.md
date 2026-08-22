@@ -6,3 +6,6 @@ The pattern package schema and runtime API will be finalized only after the Lua 
 
 Patterns should use relative or centered isotropic coordinates wherever practical and declare their display requirements explicitly.
 
+`examples/hello-lua` is the first executable pattern. During the vertical-slice
+phase it is also embedded in firmware so runtime behavior can be tested before
+LittleFS installation is introduced.

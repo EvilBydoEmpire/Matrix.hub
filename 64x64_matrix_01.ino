@@ -28,6 +28,10 @@
 #include <math.h>
 #include <esp_system.h>
 
+#include "src/platform/ProtomatterBackend.h"
+#include "src/patterns/HelloLuaPattern.h"
+#include "src/patterns/LuaPatternRuntime.h"
+
 // -----------------------------------------------------------------------------
 // Hardware configuration — Adafruit MatrixPortal S3 + 64x64 HUB75
 // -----------------------------------------------------------------------------
@@ -50,6 +54,10 @@ Adafruit_Protomatter matrix(
   clockPin, latchPin, oePin,
   true
 );
+
+ProtomatterBackend displayBackend(matrix);
+LuaPatternRuntime luaPattern(displayBackend);
+bool luaHelloEnabled = false;
 
 // -----------------------------------------------------------------------------
 // Wi-Fi configuration
@@ -194,6 +202,16 @@ void setup() {
   matrix.fillScreen(0);
   matrix.show();
 
+  if (luaPattern.loadFromString(HELLO_LUA_PATTERN, "hello-lua")) {
+    Serial.print("Lua runtime ready. Pattern memory: ");
+    Serial.print(luaPattern.memoryUsed());
+    Serial.print(" / ");
+    Serial.println(luaPattern.memoryLimit());
+  } else {
+    Serial.print("Lua runtime unavailable: ");
+    Serial.println(luaPattern.lastError());
+  }
+
   loadSettings();
   applyCurrentBrightness();
 
@@ -245,6 +263,7 @@ void loop() {
 
   if (autoCycleEnabled &&
       (millis() - lastAnimationChangeTime >= autoCycleIntervalSecs * 1000UL)) {
+    luaHelloEnabled = false;
     currentAnimation = (Animation)((currentAnimation + 1) % NUM_ANIMATIONS);
     loadPatch(currentAnimation, defaultPatches[currentAnimation]);
     lastAnimationChangeTime = millis();
@@ -262,6 +281,17 @@ void loop() {
   if (deltaTime > 0.12f) deltaTime = 0.12f; // avoid giant simulation jumps
   lastFrameTime = currentTime;
   animationTime += deltaTime;
+
+  if (luaHelloEnabled) {
+    if (luaPattern.frame(animationTime, deltaTime)) {
+      displayBackend.show();
+      return;
+    }
+
+    luaHelloEnabled = false;
+    Serial.print("Hello Lua stopped: ");
+    Serial.println(luaPattern.lastError());
+  }
 
   matrix.fillScreen(0);
 
@@ -1073,6 +1103,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background-ima
           <div class="setting"><div class="settingHeader"><label>Legacy re-sync</label><span>leave at 0 for HUB75</span></div><input id="resyncInterval" type="number" min="0" max="86400"></div>
           <button class="btn primary wide" onclick="savePlayback()">Save playback settings</button>
           <button class="btn ghost wide" onclick="command('resync')">Refresh frame timing</button>
+          <button id="luaHelloButton" class="btn teal wide" onclick="toggleLuaHello()">Run Hello Lua</button>
         </div>
       </section>
       <section class="card">
@@ -1109,9 +1140,10 @@ function debounce(key,fn){clearTimeout(timers[key]);timers[key]=setTimeout(fn,13
 function makeSlider(parent,p,current,anim){const [key,label,min,max,step,help]=p;const box=document.createElement('div');box.className='control';box.innerHTML=`<div class="controlTop"><label>${label}</label><span class="value" id="v_${key}">${current}</span></div><div class="rangeRow"><input id="r_${key}" type="range" min="${min}" max="${max}" step="${step}" value="${current}"><input id="n_${key}" class="miniInput" type="number" min="${min}" max="${max}" step="${step}" value="${current}"></div><p class="help">${help}</p>`;parent.appendChild(box);const range=box.querySelector('#r_'+key),num=box.querySelector('#n_'+key),val=box.querySelector('#v_'+key);const update=(raw,send=true)=>{let v=Number(raw);v=Math.max(min,Math.min(max,v));range.value=v;num.value=v;val.textContent=v;if(send)debounce(anim+'_'+key,()=>command('setParam',{animIndex:anim,paramName:key,value:v}))};range.oninput=()=>update(range.value);num.onchange=()=>update(num.value)}
 function renderParams(){const d=defs[state.currentPattern],params=$('paramControls');params.innerHTML='';d.params.forEach(p=>makeSlider(params,p,state.params[p[0]],state.currentPattern));const lfo=$('lfoControls');lfo.innerHTML='';const target=document.createElement('div');target.className='control';target.innerHTML='<div class="controlTop"><label>Target</label></div><select id="lfoTarget"><option value="0">Off</option>'+d.lfo.map((x,i)=>`<option value="${i+1}">${x}</option>`).join('')+'</select><p class="help">Parameter controlled by the sine LFO</p>';lfo.appendChild(target);target.querySelector('select').value=state.params.lfo_target;target.querySelector('select').onchange=e=>command('setParam',{animIndex:state.currentPattern,paramName:'lfo_target',value:Number(e.target.value)});makeSlider(lfo,['lfo_speed','LFO speed',0.05,10,0.05,'Oscillation speed'],state.params.lfo_speed,state.currentPattern);makeSlider(lfo,['lfo_amount','LFO amount',0,1,0.01,'Modulation depth from 0 to 100%'],state.params.lfo_amount,state.currentPattern)}
 function renderPatches(){const root=$('patches');root.innerHTML='';for(let i=0;i<3;i++){const p=document.createElement('div');p.className='patch '+(state.defaultPatches[state.currentPattern]===i?'isDefault':'');p.innerHTML=`<strong>Patch ${i+1}<span class="defaultMark">AUTO DEFAULT</span></strong><div class="buttonRow"><button class="btn ghost">Load</button><button class="btn primary">Save</button></div><button class="btn teal wide" style="margin-top:7px">Use for auto-cycle</button>`;const b=p.querySelectorAll('button');b[0].onclick=()=>command('loadPatch',{animIndex:state.currentPattern,patchIndex:i});b[1].onclick=()=>{if(confirm('Overwrite patch '+(i+1)+' with the current settings?'))command('savePatch',{animIndex:state.currentPattern,patchIndex:i})};b[2].onclick=()=>command('setDefault',{animIndex:state.currentPattern,patchIndex:i});root.appendChild(p)}}
-function render(){const select=$('pattern');if(!select.options.length){defs.forEach((d,i)=>select.add(new Option(d.name,i)));select.onchange=e=>command('setPattern',{value:Number(e.target.value)})}select.value=state.currentPattern;$('autoCycle').checked=state.autoCycleEnabled;$('cycleInterval').value=state.cycleInterval;$('fps').value=state.targetFPS;$('resyncInterval').value=state.resyncInterval;$('modeBadge').textContent=state.networkMode==='ap'?'Setup access point':'Wi-Fi connected';$('ipBadge').textContent=state.ip;const net=state.networkMode==='ap'?`<strong>Setup mode</strong><br>Connect to <strong>${state.apSsid}</strong><br>Open <strong>${state.ip}</strong>`:`<strong>${state.ssid||'Wi-Fi'}</strong><br>IP: <strong>${state.ip}</strong><br>Signal: <strong>${state.rssi} dBm</strong><br>Address: <strong>http://${state.hostname}.local</strong>`;$('networkInfo').innerHTML=net;renderParams();renderPatches()}
+function render(){const select=$('pattern');if(!select.options.length){defs.forEach((d,i)=>select.add(new Option(d.name,i)));select.onchange=e=>command('setPattern',{value:Number(e.target.value)})}select.value=state.currentPattern;$('autoCycle').checked=state.autoCycleEnabled;$('cycleInterval').value=state.cycleInterval;$('fps').value=state.targetFPS;$('resyncInterval').value=state.resyncInterval;$('modeBadge').textContent=state.networkMode==='ap'?'Setup access point':'Wi-Fi connected';$('ipBadge').textContent=state.ip;const net=state.networkMode==='ap'?`<strong>Setup mode</strong><br>Connect to <strong>${state.apSsid}</strong><br>Open <strong>${state.ip}</strong>`:`<strong>${state.ssid||'Wi-Fi'}</strong><br>IP: <strong>${state.ip}</strong><br>Signal: <strong>${state.rssi} dBm</strong><br>Address: <strong>http://${state.hostname}.local</strong>`;$('networkInfo').innerHTML=net;const luaButton=$('luaHelloButton');luaButton.disabled=!state.luaHelloAvailable;luaButton.textContent=state.luaHelloEnabled?'Stop Hello Lua':'Run Hello Lua';luaButton.title=state.luaHelloAvailable?'Lua calls the new C++ graphics backend':(state.luaError||'Lua runtime unavailable');renderParams();renderPatches()}
 async function refreshState(){try{state=await api('/control');render()}catch(e){toast(e.message,false)}}
 async function savePlayback(){try{await command('setAutoCycle',{value:$('autoCycle').checked});await command('setCycleInterval',{value:Number($('cycleInterval').value)});await command('setFPS',{value:Number($('fps').value)});await command('setResyncInterval',{value:Number($('resyncInterval').value)});await refreshState()}catch(e){toast(e.message,false)}}
+async function toggleLuaHello(){await command(state.luaHelloEnabled?'stopLuaHello':'runLuaHello');await refreshState()}
 async function addNetwork(){const ssid=$('newSsid').value.trim(),pass=$('newPass').value;if(!ssid)return toast('Enter an SSID',false);try{const d=await api('/wifi/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid,password:pass})});$('newSsid').value='';$('newPass').value='';toast(d.message||'Network saved')}catch(e){toast(e.message,false)}}
 async function resetWifi(){if(!confirm('Forget every stored Wi-Fi network and restart in setup mode?'))return;try{await api('/wifi/reset',{method:'POST'});toast('Restarting in setup mode')}catch(e){toast(e.message,false)}}
 window.addEventListener('load',refreshState);
@@ -1231,6 +1263,11 @@ void handleControlGet() {
   doc["autoCycleEnabled"] = autoCycleEnabled;
   doc["cycleInterval"] = autoCycleIntervalSecs;
   doc["resyncInterval"] = autoResyncInterval;
+  doc["luaHelloAvailable"] = luaPattern.available();
+  doc["luaHelloEnabled"] = luaHelloEnabled;
+  doc["luaMemoryUsed"] = luaPattern.memoryUsed();
+  doc["luaMemoryLimit"] = luaPattern.memoryLimit();
+  doc["luaError"] = luaPattern.lastError();
   doc["networkMode"] = isAPMode ? "ap" : "station";
   doc["hostname"] = HOSTNAME;
   doc["apSsid"] = SETUP_AP_SSID;
@@ -1301,6 +1338,7 @@ void handleControlPost() {
     const int value = doc["value"].as<int>();
     if (value < 0 || value >= NUM_ANIMATIONS) success = false;
     else {
+      luaHelloEnabled = false;
       currentAnimation = (Animation)value;
       loadPatch(currentAnimation, defaultPatches[currentAnimation]);
       Serial.print("Pattern selected: ");
@@ -1345,6 +1383,7 @@ void handleControlPost() {
     const int patchIndex = doc["patchIndex"].as<int>();
     if (animIndex < 0 || animIndex >= NUM_ANIMATIONS || patchIndex < 0 || patchIndex >= NUM_PATCH_SLOTS) success = false;
     else {
+      luaHelloEnabled = false;
       currentAnimation = (Animation)animIndex;
       loadPatch(currentAnimation, patchIndex);
       lastAnimationChangeTime = millis();
@@ -1359,6 +1398,20 @@ void handleControlPost() {
       preferences.begin("matrix-cfg", false); preferences.putBytes("def_p", defaultPatches, sizeof(defaultPatches)); preferences.end();
       message = String("Patch ") + (patchIndex + 1) + " is the auto-cycle default";
     }
+  } else if (!strcmp(commandName, "runLuaHello")) {
+    if (!luaPattern.available()) {
+      success = false;
+      message = String("Lua unavailable: ") + luaPattern.lastError();
+    } else {
+      luaHelloEnabled = true;
+      animationTime = 0;
+      lastAnimationChangeTime = millis();
+      message = "Hello Lua started";
+    }
+  } else if (!strcmp(commandName, "stopLuaHello")) {
+    luaHelloEnabled = false;
+    lastAnimationChangeTime = millis();
+    message = "Hello Lua stopped";
   } else if (!strcmp(commandName, "resync")) {
     resyncDisplay();
     message = "Frame timing refreshed";
