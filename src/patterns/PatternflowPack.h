@@ -6,7 +6,7 @@
 // Patternflow-derived algorithms remain CC-BY-SA-4.0; see THIRD_PARTY_NOTICES.md and the
 // preserved JavaScript sources under patterns/imports/patternflow.
 // Stable IDs include retired slots; the active catalog is separate.
-constexpr uint8_t PATTERNFLOW_PATTERN_COUNT = 65;
+constexpr uint8_t PATTERNFLOW_PATTERN_COUNT = 68;
 
 struct PatternflowMetadata {
   const char* name;

@@ -293,5 +293,20 @@
     "name": "Plasma \u2014 Classic 08",
     "engine": 16,
     "variant": 64
+  },
+  {
+    "name": "Strobe \u2014 Chrono Iris",
+    "engine": 16,
+    "variant": 65
+  },
+  {
+    "name": "Strobe \u2014 Rolling Silk",
+    "engine": 16,
+    "variant": 66
+  },
+  {
+    "name": "Strobe \u2014 Phase Garden",
+    "engine": 16,
+    "variant": 67
   }
 ]

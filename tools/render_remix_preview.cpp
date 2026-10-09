@@ -9,7 +9,7 @@ struct Frame{uint16_t pixels[4096]{};};
 void put(void* ptr,int16_t x,int16_t y,uint16_t c){if(x>=0&&y>=0&&x<64&&y<64)static_cast<Frame*>(ptr)->pixels[y*64+x]=c;}
 int main(int argc,char**argv){
  if(argc!=3&&argc!=4){std::fprintf(stderr,"usage: render_remix_preview variant output.rgb [soukan]\n");return 1;}
- int v=atoi(argv[1]);if(v<35||v>=PATTERNFLOW_PATTERN_COUNT)return 2;
+ int v=atoi(argv[1]);if(v<0||v>=PATTERNFLOW_PATTERN_COUNT)return 2;
  FILE*out=fopen(argv[2],"wb");if(!out)return 3;
  PatternflowPack engine;Frame frame;uint16_t pal[256],rgb[4096]{};
  auto&meta=PATTERNFLOW_METADATA[v];
@@ -28,6 +28,7 @@ int main(int argc,char**argv){
  engine.reset(v);
  // Eight seconds of motion at 30 FPS; renderer still advances at 60 FPS.
  for(int f=0;f<480;f++){
+  std::memset(frame.pixels,0,sizeof(frame.pixels));
   engine.render(v,64,64,1.f/60,meta.defaults,pal,rgb,put,&frame);
   if(f%2)continue;
   for(auto c:frame.pixels){unsigned char px[3]={static_cast<unsigned char>(((c>>11)&31)*255/31),static_cast<unsigned char>(((c>>5)&63)*255/63),static_cast<unsigned char>((c&31)*255/31)};fwrite(px,1,3,out);}

@@ -20,11 +20,11 @@ constexpr uint32_t Colors[Count][4]={
 inline bool active(int palette){return palette>=First&&palette<Total;}
 // Stable engine/variant IDs, including archived entries. No preset positions change.
 constexpr uint8_t Native[16]={9,5,3,3,1,7,6,9,6,4,3,2,6,8,4,4};
-constexpr uint8_t Variants[65]={
+constexpr uint8_t Variants[68]={
  4,6,4,5,7,6,9,5,4,6,5,8,1,4,7,3,6,
  7,5,9,8,8,4,4,10,1,7,9,8,5,7,4,9,5,6,
  9,6,5,6,4,4,9,1,6,1,9,5,6,5,
- 6,8,9,7,4,1,6,9,7,5,6,5,4,10,5,6
+ 6,8,9,7,4,1,6,9,7,5,6,5,4,10,5,6,3,4,7
 };
 inline int paletteFor(int engine,int variant){return First-1+(engine==16?Variants[variant]:Native[engine]);}
 inline float colorScale(int engine,int variant){

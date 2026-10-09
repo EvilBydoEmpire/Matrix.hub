@@ -20,24 +20,25 @@ const uint32_t LIBRARY_PALETTES[PALETTE_COUNT][4]={
  {Soukan::Colors[8][0],Soukan::Colors[8][1],Soukan::Colors[8][2],Soukan::Colors[8][3]},
  {Soukan::Colors[9][0],Soukan::Colors[9][1],Soukan::Colors[9][2],Soukan::Colors[9][3]}
 };
-// A compiled color-only default overlay avoids rewriting all 59 preset blobs.
+// A compiled color-only default overlay avoids rewriting all preset blobs.
 // Old user colors remain recoverable in their untouched stored patches. Once
 // the user saves/selects a default after this upgrade, their choice wins forever.
-uint8_t soukanUserDefaults[12]{};
+uint8_t artUserDefaults[12]{};
 extern uint8_t variantDefaults[PATTERNFLOW_PATTERN_COUNT];
-void applySoukanDefault(int engine,int variant,int slot){
+void applyArtDefault(int engine,int variant,int slot){
  int id=engine==16?16+variant:engine;
  int defaultSlot=engine==16?variantDefaults[variant]:defaultPatches[engine];
- if(slot!=defaultSlot||(soukanUserDefaults[id/8]&(1U<<(id%8))))return;
- colorParams[engine]={0,360,uint8_t(Soukan::paletteFor(engine,variant))};
+ if(slot!=defaultSlot||(artUserDefaults[id/8]&(1U<<(id%8))))return;
+ colorParams[engine]={0,360,7};
  colorTuning[engine]={0,100};
+ for(int c=0;c<4;c++)paletteStops[engine][7][c]=engine==16?PATTERNFLOW_METADATA[variant].originalColors[c]:ArtDirection::Native[engine][c];
 }
-bool saveSoukanOverride(int engine,int variant){
- int id=engine==16?16+variant:engine;uint8_t next[sizeof(soukanUserDefaults)];memcpy(next,soukanUserDefaults,sizeof(next));
- next[id/8]|=1U<<(id%8);if(!memcmp(next,soukanUserDefaults,sizeof(next)))return true;
+bool saveArtOverride(int engine,int variant){
+ int id=engine==16?16+variant:engine;uint8_t next[sizeof(artUserDefaults)];memcpy(next,artUserDefaults,sizeof(next));
+ next[id/8]|=1U<<(id%8);if(!memcmp(next,artUserDefaults,sizeof(next)))return true;
  Preferences store;bool ok=store.begin("matrix-cfg",false);uint8_t check[sizeof(next)]{};
- if(ok){ok=store.putBytes("soukan_ud",next,sizeof(next))==sizeof(next)&&store.getBytes("soukan_ud",check,sizeof(check))==sizeof(check)&&!memcmp(next,check,sizeof(next));store.end();}
- if(ok)memcpy(soukanUserDefaults,next,sizeof(next));return ok;
+ if(ok){ok=store.putBytes("art_ud1",next,sizeof(next))==sizeof(next)&&store.getBytes("art_ud1",check,sizeof(check))==sizeof(check)&&!memcmp(next,check,sizeof(next));store.end();}
+ if(ok)memcpy(artUserDefaults,next,sizeof(next));return ok;
 }
 struct VariantPatch {
  bool valid=false;
@@ -107,10 +108,7 @@ int galleryIndex(int engine,int variant){
 uint32_t compiledStop(int engine,int variant,int palette,int stop){
  if(palette==7){
    if(engine==PATTERNFLOW_COLLECTION)return PATTERNFLOW_METADATA[variant].originalColors[stop];
-   if(engine==PIXEL_AVALANCHE)return 0xFFFFFF;
-   if(engine==SNAKE)return 0x32E34E;
-   if(engine==BAYER_FLOW||engine==FLOW_SPHERE)return LIBRARY_PALETTES[5][stop];
-   if(engine==FLOYD_FLOW)return LIBRARY_PALETTES[3][stop];
+   if(engine>=0&&engine<16)return ArtDirection::Native[engine][stop];
  }
  return LIBRARY_PALETTES[palette][stop];
 }
@@ -199,7 +197,7 @@ void loadVariantPatch(int v,int slot){
   colorParams[16]={0,360,7};colorTuning[16]={0,100};styleParams[16]={1,0,0,0,0};
   for(int p=0;p<PALETTE_COUNT;p++)for(int c=0;c<4;c++)paletteStops[16][p][c]=compiledStop(16,v,p,c);
  }
- applySoukanDefault(16,v,slot);
+ applyArtDefault(16,v,slot);
  pfcParams.variant=v;defaultPatches[16]=variantDefaults[v];patternflowPack.reset(v);huePaletteAnimation=-1;importedRgbSignature=0;
 }
 bool saveVariantPatch(int slot){
@@ -211,8 +209,8 @@ bool saveVariantPatch(int slot){
 }
 void configureCuratedLibrary(){
  Preferences prefs;if(!prefs.begin("matrix-cfg",false))return;
- const size_t maskSize=prefs.getBytesLength("soukan_ud");
- if(maskSize==10||maskSize==sizeof(soukanUserDefaults))prefs.getBytes("soukan_ud",soukanUserDefaults,maskSize);
+ const size_t maskSize=prefs.getBytesLength("art_ud1");
+ if(maskSize==sizeof(artUserDefaults))prefs.getBytes("art_ud1",artUserDefaults,maskSize);
  bool first=prefs.getUInt("librev",0)<1;
  if(first){
   const uint64_t oldQuality=prefs.getULong64("qbits",0);uint64_t bits=0;

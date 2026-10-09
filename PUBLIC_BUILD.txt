@@ -1,5 +1,5 @@
 Matrix.hub by Televator — public source snapshot.
 Personal photo patterns, textures and preview rows removed entirely.
-All derived preview headers regenerated from the current 59-pattern atlas.
+All derived preview headers regenerated from the current 62-pattern atlas.
 No full-flash backups, credentials, local graphs, recordings or build binaries included.
 Retired IDs remain reserved internally, not visible as empty gallery slots.

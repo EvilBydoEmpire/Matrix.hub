@@ -129,9 +129,9 @@ d. Append a stable variant ID. Update metadata, dispatch/reset, the count in
    PatternflowPack.h, src/generated/PatternCatalog.h, dashboard pfMeta /
    pfAuthors / collectionPatternIds / render-size array and assets catalog.
    Update Soukan default mapping if needed. Never renumber saved IDs.
-e. Check persistence limits BEFORE adding: the current gallery has 59 entries;
+e. Check persistence limits BEFORE adding: the current gallery has 62 entries;
    the bookmark implementation has 64 bits, with two retired slots reserved.
-   Only three more entries fit the current mapping. More entries
+   All 64 bits are occupied in the current mapping. More entries
    require a compatible storage migration, not merely a larger UI array.
 f. Generate real-rendered preview frames via the host renderer and existing
    preview pipeline. Registration scripts are one-time migrations with guards;

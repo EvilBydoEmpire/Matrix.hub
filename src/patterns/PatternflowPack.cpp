@@ -14,23 +14,23 @@
 #define PI 3.14159265358979323846f
 
 const PatternflowMetadata PATTERNFLOW_METADATA[PATTERNFLOW_PATTERN_COUNT] = {
-  {"Vector Field Flow", {"Turbulence", "Velocity", "Density", "Palette"}, {50,35,50,10}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Chromatic Vortex", {"Split", "Swirl speed", "Density", "Color bias"}, {40,25,40,50}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Liquid Ripple", {"Refraction", "Speed", "Waves", "Specular"}, {40,40,50,20}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"PF Kaleidoscope", {"Symmetry", "Speed", "Core depth", "Twist"}, {30,30,50,40}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Isometric Pillars", {"Grid size", "Speed", "Height", "Color shift"}, {40,30,50,30}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Color Ribbons", {"Hue", "Speed", "Ribbons", "Amplitude"}, {50,25,50,50}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Folded Cross", {"Density", "Speed", "Folds", "Color mask"}, {50,30,50,30}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Bitwise Shards", {"Resolution", "Speed", "Bit shift", "Palette"}, {50,30,40,30}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
+  {"Vector Field Flow", {"Turbulence", "Velocity", "Density", "Palette"}, {50,35,50,10}, {0x174d62,0x3dadae,0xc4e3d4,0x3dadae}},
+  {"Chromatic Vortex", {"Split", "Swirl speed", "Density", "Color bias"}, {40,25,40,50}, {0x283b8c,0x4acac8,0xd3b2de,0x4acac8}},
+  {"Liquid Ripple", {"Refraction", "Speed", "Waves", "Specular"}, {40,40,50,20}, {0x103b59,0x459eb2,0xcae1d6,0x459eb2}},
+  {"PF Kaleidoscope", {"Symmetry", "Speed", "Core depth", "Twist"}, {30,30,50,40}, {0x622e75,0xc88098,0xecd5aa,0xc88098}},
+  {"Isometric Pillars", {"Grid size", "Speed", "Height", "Color shift"}, {40,30,50,30}, {0x243f56,0x92b7ba,0xd9ad7e,0x92b7ba}},
+  {"Color Ribbons", {"Hue", "Speed", "Ribbons", "Amplitude"}, {50,25,50,50}, {0xb05857,0xe8b987,0x468f9b,0xe8b987}},
+  {"Folded Cross", {"Density", "Speed", "Folds", "Color mask"}, {50,30,50,30}, {0xdfddd1,0xdfddd1,0xdfddd1,0xdfddd1}},
+  {"Bitwise Shards", {"Resolution", "Speed", "Bit shift", "Palette"}, {50,30,40,30}, {0x337a89,0xc0dcd1,0x337a89,0xc0dcd1}},
   {"Blooming Bioluminescence", {"Cells", "Speed", "Plasma", "Base hue"}, {38,38,50,0}, {0xFF4226,0x8080F3,0x000FF1,0x807303}},
   {"Chladni Acoustic Waves", {"Mode N", "Mode M", "Speed", "Edge sharpness"}, {29,36,17,37}, {0x000000,0x4500AC,0x8800C9,0xFF0000}},
   {"Pulsating Solar Flare", {"Density", "Pulse speed", "Wave frequency", "Glow"}, {29,19,44,50}, {0xFF0000,0xFF3900,0xFF7000,0xFFD000}},
-  {"PsiOp Death Star", {"Orbit speed", "Point density", "Dish size", "Equator glow"}, {25,58,38,62}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Pendulum Waves", {"Animation speed", "Base frequency", "Frequency spread", "Margin"}, {12,34,50,8}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Nachtschwärmer", {"Flow speed", "Blob size", "Gooeyness", "Particles"}, {8,32,42,34}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Cathedral Glass", {"Drift speed", "Pane size", "Lead glow", "Color spread"}, {7,60,52,34}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Tidal Topography", {"Tide speed", "Contour spacing", "Wave depth", "Line weight"}, {8,50,62,40}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
-  {"Whitney Harmonics", {"Canon speed", "Voices", "Orbit size", "Persistence"}, {8,64,62,48}, {0xFF3155,0xFFC247,0x22D3C5,0x765DFF}},
+  {"PsiOp Death Star", {"Orbit speed", "Point density", "Dish size", "Equator glow"}, {25,58,38,62}, {0xbdcfc7,0xbdcfc7,0xbdcfc7,0xbdcfc7}},
+  {"Pendulum Waves", {"Animation speed", "Base frequency", "Frequency spread", "Margin"}, {12,34,50,8}, {0x8eb8cd,0xe7d5aa,0x8eb8cd,0xe7d5aa}},
+  {"Nachtschwärmer", {"Flow speed", "Blob size", "Gooeyness", "Particles"}, {8,32,42,34}, {0x17535e,0x4fbaa9,0xc7ddd0,0x4fbaa9}},
+  {"Cathedral Glass", {"Drift speed", "Pane size", "Lead glow", "Color spread"}, {7,60,52,34}, {0x355883,0xb96858,0xe4c784,0x559e96}},
+  {"Tidal Topography", {"Tide speed", "Contour spacing", "Wave depth", "Line weight"}, {8,50,62,40}, {0x183e55,0x388c95,0xc5dcc2,0x388c95}},
+  {"Whitney Harmonics", {"Canon speed", "Voices", "Orbit size", "Persistence"}, {8,64,62,48}, {0xe3d4b5,0xae6c89,0xe3d4b5,0x70adb9}},
   {"Velvet Steps", {"Walk","Direction","Cat scale","Frost"}, {30,0,42,25}, {0xEBECE9,0x595C5F,0xBA7B8B,0xE6BEC3}},
   {"Vega444 C", {"Grid","Bulge","Wave depth","Color drift"}, {67,75,47,0}, {0xD92929,0x24A361,0x576FD6,0x1C7052}},
   {"Twisted Tunnel", {"Ring spacing","Twist","Accent hue","Travel speed"}, {50,50,50,8}, {0xD11414,0x0F478C,0xF2C20A,0xFFFFFF}},
@@ -79,6 +79,9 @@ const PatternflowMetadata PATTERNFLOW_METADATA[PATTERNFLOW_PATTERN_COUNT] = {
   {"Warped Checkerboard — Liquid Circuit", {"Motion speed","Grid density","Liquid warp","Aliasing"}, {26,29,85,32}, {0xff3155,0xffc247,0x22d3c5,0x765dff}},
   {"Ripples — Classic 08", {"Drop frequency","Trail fade","Ring width","Wave speed"}, {10,20,20,25}, {0x3030FF,0x5030FF,0x7030FF,0x4030FF}},
   {"Plasma — Classic 08", {"Flow speed","Wave scale","Hue drift","Trail fade"}, {15,30,50,30}, {0xFF0000,0xFFFF00,0x00FFFF,0x8000FF}},
+  {"Strobe — Chrono Iris", {"Pulse rate","Petal count","Exposure width","Flash depth"}, {8,40,60,18}, {0x5171a6,0xa8c8d6,0xe1d9ba,0xa8c8d6}},
+  {"Strobe — Rolling Silk", {"Pulse rate","Curtain density","Exposure width","Flash depth"}, {6,32,65,16}, {0x3b7380,0x9ac4bb,0xddcfa5,0x9ac4bb}},
+  {"Strobe — Phase Garden", {"Pulse rate","Lantern count","Exposure width","Flash depth"}, {9,35,55,20}, {0xaf704e,0xe0bb83,0xaf704e,0xe0bb83}},
 };
 
 namespace {
@@ -232,6 +235,7 @@ float fbm(float x, float y) {
 #include "AcidStudies.inc"
 #include "PongWars.inc"
 #include "Classic08.inc"
+#include "AmbientStrobes.inc"
 
 void PatternflowPack::reset(uint8_t index) {
   if (index < PATTERNFLOW_PATTERN_COUNT) time_[index] = 0.0f;
@@ -241,6 +245,7 @@ void PatternflowPack::reset(uint8_t index) {
   resetAdvancedPattern();
   resetPongWars();
   resetClassic08();
+  resetAmbientStrobes();
 }
 
 void PatternflowPack::render(uint8_t index, uint16_t width, uint16_t height,
@@ -262,6 +267,7 @@ void PatternflowPack::render(uint8_t index, uint16_t width, uint16_t height,
     }
     geometryWidth=width;geometryHeight=height;
   }
+  if(index >= 65) { renderAmbientStrobe(index-65,width,height,deltaTime,p,palette,writer,context); return; }
   if(index >= 63) { renderClassic08(index-63,width,height,deltaTime,p,palette,writer,context); return; }
   if(index >= 60) { renderAcidPattern(index-60,width,height,deltaTime,p,palette,writer,context); return; }
   if(index == 59) { renderNovaPattern(7,width,height,deltaTime,p,palette,writer,context); return; }

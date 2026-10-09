@@ -10,7 +10,11 @@ The renamed firmware uses `matrix-16.local`, `matrix-22.local`, and
 `matrix-64.local`. Devices running older firmware retain their old hostnames
 until updated. Initial provisioning/recovery uses USB; normal updates use OTA.
 
-The active gallery currently contains **59 patterns**. The older feature
+The active gallery currently contains **62 patterns**. Authored/curated colors
+are the defaults; Soukan palettes remain optional. Three ambient strobe studies
+are manual-selection only, with gentle defaults and still thumbnails. See
+[color direction and temporal-study notes](docs/ART_DIRECTION_AND_STROBES.md).
+The older feature
 notes below are historical, not a promise that every pattern has received an
 individual small-panel aesthetic pass. Lua package downloads remain planned.
 

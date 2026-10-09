@@ -64,7 +64,7 @@ def export(destination):
     (destination/'PUBLIC_BUILD.txt').write_text(
         'Matrix.hub by Televator — public source snapshot.\n'
         'Personal photo patterns, textures and preview rows removed entirely.\n'
-        'All derived preview headers regenerated from the current 59-pattern atlas.\n'
+        f'All derived preview headers regenerated from the current {len(catalog)}-pattern atlas.\n'
         'No full-flash backups, credentials, local graphs, recordings or build binaries included.\n'
         'Retired IDs remain reserved internally, not visible as empty gallery slots.\n')
     manifest = {str(p.relative_to(destination)): hashlib.sha256(p.read_bytes()).hexdigest()

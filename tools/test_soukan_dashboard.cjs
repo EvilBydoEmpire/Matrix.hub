@@ -5,7 +5,7 @@ assert(names);const ctx=vm.createContext({});
 vm.runInContext(names+'\nthis.names=paletteNames',ctx);
 assert.equal(ctx.names.length,21);
 assert.deepEqual(Array.from(ctx.names.slice(11)),Array.from({length:10},(_,i)=>`Soukan ${i+1}`));
-assert.equal(ctx.names[7],'Original','Legacy palette IDs must not shift');
+assert.equal(ctx.names[7],'Authored / curated','Legacy palette IDs must not shift');
 const animate=source.split('\n').find(l=>l.startsWith('let previewLast='));
 for(const size of [16,28]){
  const draws=[],canvas={width:28,height:28,dataset:{preview:'9'},getContext(){return{drawImage(...v){draws.push(v)},fillRect(){}}}};

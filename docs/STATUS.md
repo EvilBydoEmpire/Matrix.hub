@@ -1,5 +1,17 @@
 # Implementation status
 
+## Authored colors and ambient strobe studies — October 10, 2026
+
+Source now has 62 gallery entries. Restored source RGB and authored palettes as
+defaults, with bespoke restrained palettes for early generic/native effects.
+Soukan stays available, but no longer overrides every default. Color-only
+migration uses a separate persistent user-override mask; non-color presets are
+untouched. Three full-resolution ambient temporal studies are manual-only,
+warn on selection, and have non-flashing thumbnails. See
+ART_DIRECTION_AND_STROBES.md. All three hardware targets compile; host render
+tests pass at 16/22/64. Live Matrix.64 verification/upload is pending while its
+Wi-Fi connection is intermittent. Native preview recapture is pending too.
+
 ## Personal-photo removal — October 9, 2026
 
 Removed both personal-photo patterns, the embedded image header, photo renderer,
