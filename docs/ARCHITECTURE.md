@@ -72,6 +72,19 @@ Installed patterns use a package directory rather than embedding discovery metad
 
 `manifest.json` describes identity, version, engine compatibility, display requirements, and parameters. `main.lua` provides lifecycle callbacks such as initialization and frame rendering.
 
+### Palette parameters
+
+Color gradients are firmware resources rather than Lua source data. Pattern
+metadata stores only a palette ID, base hue, and hue spread. The firmware turns
+those values into a cached 256-entry native display palette. Lua patterns will
+use `color.palette(position)` while the runtime supplies the active cached
+palette from manifest/UI parameters.
+
+This allows palettes with multiple allowed hue ranges and gradients without
+embedding RGB stop arrays in every pattern. It also keeps the per-pixel path in
+C++ and makes one Lua file portable across RGB565 HUB75, RGB WS2812, and
+monochrome palette-mapping backends.
+
 Downloads are written to a staging path. The device validates size, digest, manifest, compatibility, and Lua loading before replacing an installed version. Installed patterns continue to work offline.
 
 ## Lua runtime rules
@@ -83,6 +96,8 @@ Downloads are written to a staging path. The device validates size, digest, mani
 - Filesystem, operating-system, package-loading, debug, and network libraries are unavailable to scripts.
 - Direct pixel drawing is supported for sparse effects.
 - Full-frame effects and expensive primitives run in C++ through `gfx` and `fx` APIs.
+- Palette generation and lookup run in C++; Lua scripts pass normalized palette
+  positions rather than calculating RGB gradients per pixel.
 
 ## Storage responsibilities
 
@@ -101,4 +116,3 @@ Pattern and firmware installation is an explicit maintenance state:
 3. Perform download, validation, and flash/filesystem writes.
 4. Resume playback or reboot when complete.
 5. Preserve the previous working pattern or firmware on failure.
-

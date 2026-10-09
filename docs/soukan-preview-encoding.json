@@ -1,0 +1,20 @@
+{
+  "hub75": {
+    "tileSize": 28,
+    "frames": 24,
+    "patterns": 61,
+    "intervalMs": 67,
+    "colors": 256,
+    "bytes": 466201,
+    "meanAbsoluteRgb8Error": 2.438
+  },
+  "ws2812": {
+    "tileSize": 16,
+    "frames": 24,
+    "patterns": 61,
+    "intervalMs": 67,
+    "colors": 256,
+    "bytes": 181090,
+    "meanAbsoluteRgb8Error": 2.542
+  }
+}

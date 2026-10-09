@@ -20,6 +20,6 @@ class DisplayBackend {
                         uint32_t rgb) = 0;
   virtual void drawCircle(int16_t x, int16_t y, int16_t radius,
                           uint32_t rgb) = 0;
+  virtual void setOutputScale(float scale) = 0;
   virtual void show() = 0;
 };
-

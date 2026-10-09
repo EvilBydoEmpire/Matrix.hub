@@ -1,0 +1,61 @@
+AI HANDOFF — MATRIX.HUB BY TELEVATOR
+The complete, current single-document handoff is INSTALL_WITH_AI.txt.
+
+Help me maintain my gifted 16 x 16 LED matrix using this repository.
+Read this file, gift/START_HERE.txt, docs/HARDWARE_PROFILES.md,
+docs/STATUS.md and platformio.ini before proposing changes.
+
+PROJECT / DEVICE
+Project: Matrix.hub (https://github.com/Televatorxyz/Matrix.hub). The shared Arduino source is still named
+64x64_matrix_01.ino; that name does NOT select the physical resolution.
+Target: ESP32-WROOM / ESP32-D0WD-V3, 4 MB flash, WS2812 16 x 16, GPIO22,
+GRB, horizontal serpentine rows, rotation 0. Verify the attached device
+before writing anything; do not select a port merely because it is first.
+Find its current IP; matrix-16.local is the default hostname.
+Multiple same-size devices currently share that default hostname.
+
+TOOLCHAIN / BUILDS
+Use the versions pinned in platformio.ini. Set up PlatformIO in an isolated
+Python environment if needed; do not depend on the previous owner's paths.
+After setup, the relevant commands (pio must resolve to that environment) are:
+  pio run -e esp32_wroom_ws2812_16x16
+  pio run -e esp32_wroom_ws2812_16x16_ota -t upload --upload-port VERIFIED_IP
+  pio run -e esp32_wroom_ws2812_16x16 -t upload --upload-port VERIFIED_USB_PORT
+Replace VERIFIED_IP / VERIFIED_USB_PORT only after confirming the target.
+Check firmware fits the 1.75 MiB application slot. Do not change partitions
+via normal application OTA. Preserve NVS, Wi-Fi and user pattern settings.
+Use USB for initial provisioning or recovery; back up before repartitioning.
+Use tools/matrix_hub.py with an explicit profile and verified host for OTA.
+
+OTA IS A PERMANENT REQUIREMENT
+Always retain the OTA receiver and OTA-capable partitions in deployed builds.
+After uploading, verify reboot, matching hardware profile, /diagnostics,
+otaReady, dashboard reachability and animation performance. Receiver readiness
+alone is not proof that a Wi-Fi transfer has been tested. USB is not required
+for ordinary updates. Never expose the unauthenticated service to the Internet.
+
+PATTERNS
+The gallery currently uses compiled C++ patterns, including
+src/patterns/PatternflowPack.cpp and its included pattern modules.
+LuaPatternRuntime is a bounded proof of concept with a Hello Lua example;
+download/install of independent Lua packages is NOT a finished feature.
+Adding a compiled pattern requires a firmware rebuild/upload. Follow the
+existing stable IDs, catalog, palette/default persistence and real-rendered
+preview pipeline; do not renumber existing patterns or overwrite presets.
+Expose eight meaningful controls. Share algorithms between hardware profiles,
+but use resolution-appropriate defaults: fewer particles/rings/lines where
+needed, readable spacing, and suitable wave frequencies for 16 x 16.
+Preserve overall composition rather than simply cropping a 64 x 64 image.
+Not all existing patterns have received an individual 16 x 16 aesthetic pass.
+
+VALIDATION / PRIVACY
+Use relevant tools/test_* tests, compile the correct profile, then benchmark
+on the actual board. Ask the owner to verify orientation and physical colors.
+Do not claim an on-device test from a successful host build alone.
+Do not publish credentials, full flash/NVS backups, or personal photo assets.
+Confirm publication scope and imported-code licenses before sharing releases.
+Keep Wi-Fi passwords out of source and AI logs.
+
+Start by reporting what release/source tree and device you found. Ask what
+I want changed before editing or uploading. Explain any missing dependencies
+or access; this prompt does not itself grant access to my Mac or network.

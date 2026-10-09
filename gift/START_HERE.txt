@@ -1,0 +1,63 @@
+MATRIX.HUB BY TELEVATOR — MATRIX.16 GIFT GUIDE
+For the complete current setup/development instructions use INSTALL_WITH_AI.txt.
+Draft for the currently installed ESP32-WROOM / WS2812 device.
+This folder is documentation, not yet a complete install/recovery package.
+
+EVERYDAY USE — NO MAC APP REQUIRED
+1. Power the assembled matrix using its supplied power arrangement.
+2. At a new home, the controller tries its saved Wi-Fi networks. If none
+   connects, it opens the Wi-Fi network Matrix.16-Setup.
+   This is Wi-Fi onboarding, NOT Bluetooth pairing.
+3. On your Mac or phone, join Matrix.16-Setup. It is an open local
+   setup network; an Internet-unavailable warning is normal.
+4. Open http://192.168.4.1/ if the setup page does not appear automatically.
+5. Select or enter your 2.4 GHz Wi-Fi network, enter its password, then
+   choose Save and restart.
+6. Rejoin your home Wi-Fi and open http://matrix-16.local/.
+   If that name does not resolve, use the controller's IP from your router.
+   The previous owner's IP address is not a permanent address for your home.
+7. Choose patterns and adjust controls. Use the dashboard's save-defaults
+   action when you want a pattern's settings retained.
+
+The display runs without a Mac connected. For wireless firmware updates,
+it needs power and a reachable local Wi-Fi connection. Do not configure
+router port forwarding to the dashboard or OTA receiver.
+
+WIRING REFERENCE — DISCONNECT ALL POWER BEFORE REPAIR
+Confirmed software configuration:
+  ESP32 GPIO22 -> WS2812 matrix DIN (data input, not DOUT)
+  Matrix: 16 x 16; WS2812, GRB, 800 kHz
+  Pixel layout: top-left origin, horizontal serpentine rows, rotation 0
+Required electrical connections:
+  Regulated 5 V supply -> matrix +5V
+  Supply ground -> matrix GND and ESP32 GND (shared ground)
+Never connect 5 V to an ESP32 GPIO or its 3V3 pin.
+Do not infer connector polarity from wire colors.
+
+The exact ESP32 power-pin connection, connector orientation, supply rating,
+and any inline resistor or logic-level shifter have NOT been physically
+documented yet. The giver must add a labeled photo of the actual assembly
+before this is used as a cable-repair guide. Do not improvise connections
+between external 5 V and USB power without checking the board's wiring.
+
+UPDATING / RECOVERY
+Ordinary firmware updates can use Wi-Fi OTA, with a binary built specifically
+for esp32_wroom_ws2812_16x16. Do not install MatrixPortal/S3 firmware here.
+USB is the recovery route and is required for partition-layout changes.
+The current 4 MB layout has two 1.75 MiB application slots and 448 KiB LittleFS.
+Never erase all flash as a routine update step; this loses device settings.
+
+FOR CODING WITH AN AI
+Use AI_HANDOFF.txt with a local coding assistant and the matching source
+release. Merely pasting the prompt into an AI without local/network tools
+does not give it access to the device.
+
+BEFORE THIS GIFT PACKAGE IS DISTRIBUTED
+- Audit source, firmware and previews for private photos and credentials;
+  obtain permission or remove private assets in a separate gift build.
+- Do not include full-flash backups: these can contain Wi-Fi credentials.
+- Check redistribution rights and preserve imported-pattern attribution.
+- Add labeled wiring photos and the supplied power adapter specification.
+- Publish matching source, tested firmware, checksums and a recovery helper.
+- Test onboarding without a known network and an actual Wi-Fi update/reboot.
+- Optionally remove the giver's saved Wi-Fi networks with their permission.

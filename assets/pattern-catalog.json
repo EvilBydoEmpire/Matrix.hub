@@ -1,0 +1,307 @@
+[
+  {
+    "name": "Starfield",
+    "engine": 0,
+    "variant": null
+  },
+  {
+    "name": "Warped Checkerboard",
+    "engine": 1,
+    "variant": null
+  },
+  {
+    "name": "Moir\u00e9 Lines",
+    "engine": 3,
+    "variant": null
+  },
+  {
+    "name": "Shockwave",
+    "engine": 5,
+    "variant": null
+  },
+  {
+    "name": "Warp Corridors",
+    "engine": 6,
+    "variant": null
+  },
+  {
+    "name": "Pixel Avalanche",
+    "engine": 7,
+    "variant": null
+  },
+  {
+    "name": "Bayer Flow",
+    "engine": 9,
+    "variant": null
+  },
+  {
+    "name": "Snake",
+    "engine": 11,
+    "variant": null
+  },
+  {
+    "name": "Squares",
+    "engine": 12,
+    "variant": null
+  },
+  {
+    "name": "Flow Sphere",
+    "engine": 14,
+    "variant": null
+  },
+  {
+    "name": "Vector Field Flow",
+    "engine": 16,
+    "variant": 0
+  },
+  {
+    "name": "Chromatic Vortex",
+    "engine": 16,
+    "variant": 1
+  },
+  {
+    "name": "Liquid Ripple",
+    "engine": 16,
+    "variant": 2
+  },
+  {
+    "name": "PF Kaleidoscope",
+    "engine": 16,
+    "variant": 3
+  },
+  {
+    "name": "Isometric Pillars",
+    "engine": 16,
+    "variant": 4
+  },
+  {
+    "name": "Color Ribbons",
+    "engine": 16,
+    "variant": 5
+  },
+  {
+    "name": "Folded Cross",
+    "engine": 16,
+    "variant": 6
+  },
+  {
+    "name": "Bitwise Shards",
+    "engine": 16,
+    "variant": 7
+  },
+  {
+    "name": "Blooming Bioluminescence",
+    "engine": 16,
+    "variant": 8
+  },
+  {
+    "name": "Chladni Acoustic Waves",
+    "engine": 16,
+    "variant": 9
+  },
+  {
+    "name": "Pulsating Solar Flare",
+    "engine": 16,
+    "variant": 10
+  },
+  {
+    "name": "PsiOp Death Star",
+    "engine": 16,
+    "variant": 11
+  },
+  {
+    "name": "Pendulum Waves",
+    "engine": 16,
+    "variant": 12
+  },
+  {
+    "name": "Nachtschw\u00e4rmer",
+    "engine": 16,
+    "variant": 13
+  },
+  {
+    "name": "Cathedral Glass",
+    "engine": 16,
+    "variant": 14
+  },
+  {
+    "name": "Tidal Topography",
+    "engine": 16,
+    "variant": 15
+  },
+  {
+    "name": "Whitney Harmonics",
+    "engine": 16,
+    "variant": 16
+  },
+  {
+    "name": "Vega444 C",
+    "engine": 16,
+    "variant": 18
+  },
+  {
+    "name": "Twisted Tunnel",
+    "engine": 16,
+    "variant": 19
+  },
+  {
+    "name": "Soliton Lattice Echo",
+    "engine": 16,
+    "variant": 21
+  },
+  {
+    "name": "Ripple Cell Grid 2",
+    "engine": 16,
+    "variant": 22
+  },
+  {
+    "name": "Poolside",
+    "engine": 16,
+    "variant": 23
+  },
+  {
+    "name": "Squircle Spacetime Warp",
+    "engine": 16,
+    "variant": 25
+  },
+  {
+    "name": "Hypno Circles",
+    "engine": 16,
+    "variant": 29
+  },
+  {
+    "name": "Collatz Kelp",
+    "engine": 16,
+    "variant": 31
+  },
+  {
+    "name": "Bioluminescent Topo Vortex",
+    "engine": 16,
+    "variant": 33
+  },
+  {
+    "name": "Whitney Harmonics II",
+    "engine": 16,
+    "variant": 35
+  },
+  {
+    "name": "Chladni Resonance",
+    "engine": 16,
+    "variant": 36
+  },
+  {
+    "name": "Warped Checkerboard \u2014 Silk",
+    "engine": 16,
+    "variant": 38
+  },
+  {
+    "name": "Squares \u2014 Infinite",
+    "engine": 16,
+    "variant": 42
+  },
+  {
+    "name": "Whitney \u2014 Motion Graphics 1968",
+    "engine": 16,
+    "variant": 43
+  },
+  {
+    "name": "Whitney \u2014 Chromatic Bloom",
+    "engine": 16,
+    "variant": 45
+  },
+  {
+    "name": "Bioluminescent Topo Vortex \u2014 Abyssal",
+    "engine": 16,
+    "variant": 46
+  },
+  {
+    "name": "Warped Checkerboard \u2014 Interference",
+    "engine": 16,
+    "variant": 47
+  },
+  {
+    "name": "Ripples",
+    "engine": 16,
+    "variant": 48
+  },
+  {
+    "name": "Luminous Loom",
+    "engine": 16,
+    "variant": 49
+  },
+  {
+    "name": "Ferrofluid",
+    "engine": 16,
+    "variant": 50
+  },
+  {
+    "name": "Accretion",
+    "engine": 16,
+    "variant": 51
+  },
+  {
+    "name": "Origami Flight",
+    "engine": 16,
+    "variant": 52
+  },
+  {
+    "name": "Signal Orchard",
+    "engine": 16,
+    "variant": 53
+  },
+  {
+    "name": "Whitney \u2014 Resonant Orbits",
+    "engine": 16,
+    "variant": 54
+  },
+  {
+    "name": "Whitney \u2014 Phase Architecture",
+    "engine": 16,
+    "variant": 55
+  },
+  {
+    "name": "Photo \u2014 Empty slot 1",
+    "engine": 16,
+    "variant": 56
+  },
+  {
+    "name": "Photo \u2014 Empty slot 2",
+    "engine": 16,
+    "variant": 57
+  },
+  {
+    "name": "Pong Wars",
+    "engine": 16,
+    "variant": 58
+  },
+  {
+    "name": "Whitney \u2014 Resonant Orbits v2",
+    "engine": 16,
+    "variant": 59
+  },
+  {
+    "name": "Warped Checkerboard \u2014 Acid Cathedral",
+    "engine": 16,
+    "variant": 60
+  },
+  {
+    "name": "Warped Checkerboard \u2014 Phase Slippage",
+    "engine": 16,
+    "variant": 61
+  },
+  {
+    "name": "Warped Checkerboard \u2014 Liquid Circuit",
+    "engine": 16,
+    "variant": 62
+  },
+  {
+    "name": "Ripples \u2014 Classic 08",
+    "engine": 16,
+    "variant": 63
+  },
+  {
+    "name": "Plasma \u2014 Classic 08",
+    "engine": 16,
+    "variant": 64
+  }
+]

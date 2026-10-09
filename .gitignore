@@ -4,6 +4,7 @@ build/
 .pioenvs/
 .piolibdeps/
 .venv/
+tools/matrix-audio-mac/dist/
 
 # Local editor and operating-system files
 .DS_Store
@@ -16,3 +17,11 @@ secrets.h
 *.pem
 *.key
 
+# Private/local development state. Public export supplies sanitized photo assets.
+__pycache__/
+*.pyc
+graphify-out/
+src/platform/graphify-out/
+*.mp3
+*.HEIC
+*.heic
