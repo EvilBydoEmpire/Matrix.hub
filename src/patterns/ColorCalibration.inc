@@ -34,11 +34,19 @@ bool saveColorCalibration(){
   bool ok=store.putBytes("colorcal",saved,sizeof(saved))==sizeof(saved);store.end();return ok;
 }
 bool photoTransferActive(){
-  return photoCorrectionEnabled && currentAnimation==PATTERNFLOW_COLLECTION &&
-    (pfcParams.variant==56 || pfcParams.variant==57);
+  return false; // Photo patterns removed; calibration gamma is comparison-only.
 }
-// Read the photo already included by PatternflowPack.cpp without a second
-// flash copy. The accessor validates IDs and coordinates.
+// Procedural calibration charts: no image assets or personal photographs.
+uint16_t calibrationTexel(uint8_t chart,uint8_t x,uint8_t y){
+  const uint16_t level=x*15/63;
+  if(chart==0)return (level<<8)|(level<<4)|level;
+  switch(y/16){
+    case 0:return level<<8;
+    case 1:return level<<4;
+    case 2:return level;
+    default:return (level<<8)|(level<<4)|level;
+  }
+}
 void renderColorCalibration(){
   matrix.fillScreen(0);matrix.setTextWrap(false);matrix.setTextSize(1);
   if(calibrationMode==1){
@@ -68,7 +76,7 @@ void renderColorCalibration(){
       unsigned sum[3]{};
       // Identical full-image framing on each side; area average 2x2 pixels.
       for(int dy=0;dy<2;dy++)for(int dx=0;dx<2;dx++){
-        uint16_t v=personalPhotoTexel(calibrationPhoto,x*2+dx,y*2+dy);
+        uint16_t v=calibrationTexel(calibrationPhoto,x*2+dx,y*2+dy);
         sum[0]+=(v>>8)&15;sum[1]+=(v>>4)&15;sum[2]+=v&15;
       }
       uint8_t channel[3];

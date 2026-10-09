@@ -7,7 +7,6 @@
 // preserved JavaScript sources under patterns/imports/patternflow.
 // Stable IDs include retired slots; the active catalog is separate.
 constexpr uint8_t PATTERNFLOW_PATTERN_COUNT = 65;
-uint16_t personalPhotoTexel(uint8_t id,uint8_t x,uint8_t y);
 
 struct PatternflowMetadata {
   const char* name;

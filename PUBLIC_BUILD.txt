@@ -1,5 +1,5 @@
 Matrix.hub by Televator — public source snapshot.
-Personal photo arrays replaced with zero data; both preview rows are black.
-All derived preview headers regenerated from the scrubbed source atlas.
+Personal photo patterns, textures and preview rows removed entirely.
+All derived preview headers regenerated from the current 59-pattern atlas.
 No full-flash backups, credentials, local graphs, recordings or build binaries included.
-Photo slot IDs remain stable to preserve device settings compatibility.
+Retired IDs remain reserved internally, not visible as empty gallery slots.

@@ -1,5 +1,17 @@
 # Implementation status
 
+## Personal-photo removal — October 9, 2026
+
+Removed both personal-photo patterns, the embedded image header, photo renderer,
+import/registration scripts and their source/derived preview rows. The gallery
+now has 59 entries. Variant IDs 56/57 remain inert, hidden tombstones; later IDs
+are not renumbered. Persisted bookmark bits retain their original slots via
+bookmarkStorageIndex, avoiding a destructive settings migration. Calibration
+comparisons now use procedural grayscale/RGB charts rather than photographs.
+No Wi-Fi credentials are removed or modified. The owner explicitly wants
+existing saved networks retained when gifting the device. Historical notes
+below describe prior versions, not the current photo-free project.
+
 ## Matrix.hub identity and public handoff — October 9, 2026
 
 Project branding is Matrix.hub by Televator. Device display names are Matrix.16,

@@ -16,7 +16,7 @@ int main(){
   for(int i=0;i<4096;i++){int r=((i>>8)&15)*17,g=((i>>4)&15)*17,b=(i&15)*17;rgb[i]=((r&248)<<8)|((g&252)<<3)|(b>>3);}
  };
  auto simulate=[&](int v,const uint8_t*p,int fps,float time){engine.reset(v);Frame f;for(int i=0;i<int(fps*time);i++)engine.render(v,64,64,1.f/fps,p,pal,rgb,put,&f);return f;};
- for(int v:{49,50,51,52,53,54,55,56,57,59,60,61,62}){
+ for(int v:{49,50,51,52,53,54,55,59,60,61,62}){
   prepare(v);auto&meta=PATTERNFLOW_METADATA[v];Frame base=simulate(v,meta.defaults,60,5.f),slow=simulate(v,meta.defaults,30,5.f),fast=simulate(v,meta.defaults,120,5.f);
   assert(difference(base,slow)<.01f&&difference(base,fast)<.01f);
   for(int c=0;c<4;c++){uint8_t p[4];memcpy(p,meta.defaults,4);p[c]=0;

@@ -60,4 +60,4 @@ BEFORE THIS GIFT PACKAGE IS DISTRIBUTED
 - Add labeled wiring photos and the supplied power adapter specification.
 - Publish matching source, tested firmware, checksums and a recovery helper.
 - Test onboarding without a known network and an actual Wi-Fi update/reboot.
-- Optionally remove the giver's saved Wi-Fi networks with their permission.
+- Keep the giver's saved Wi-Fi networks, as explicitly requested; add yours.

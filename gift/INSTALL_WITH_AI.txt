@@ -129,8 +129,9 @@ d. Append a stable variant ID. Update metadata, dispatch/reset, the count in
    PatternflowPack.h, src/generated/PatternCatalog.h, dashboard pfMeta /
    pfAuthors / collectionPatternIds / render-size array and assets catalog.
    Update Soukan default mapping if needed. Never renumber saved IDs.
-e. Check persistence limits BEFORE adding: the current gallery has 61 slots;
-   the bookmark implementation supports 64 gallery entries. More entries
+e. Check persistence limits BEFORE adding: the current gallery has 59 entries;
+   the bookmark implementation has 64 bits, with two retired slots reserved.
+   Only three more entries fit the current mapping. More entries
    require a compatible storage migration, not merely a larger UI array.
 f. Generate real-rendered preview frames via the host renderer and existing
    preview pipeline. Registration scripts are one-time migrations with guards;
@@ -141,8 +142,8 @@ g. Run relevant tools/test_* checks and compile the target. Inspect at 16,
 h. Preserve attribution/licenses for adaptations. Don't copy a web example
    and label it as original work. Never commit personal photographs/passwords.
 
-The public build intentionally has empty photo slots and scrubbed preview rows.
-Private local images must never be added to a public PR, generated header,
+Both personal-photo patterns and their preview rows have been fully removed;
+there are no empty photo cards. Private images must never be added to a public PR, generated header,
 preview atlas or firmware release without their owner's explicit consent.
 
 9. SHARE PATTERNS / MAKE YOUR OWN MOD
@@ -166,13 +167,18 @@ Lua catalog can decouple patterns from firmware; it needs its own installer,
 compatibility/version checks, resource limits and error recovery first.
 
 10. COLOR / CALIBRATION LIMITATIONS
-Photos are imported to sRGB, reduced to RGB444 and area-averaged for smaller
-panels. Browser thumbnails are prerecorded, not a calibrated optical preview.
-NeoMatrix applies its own gamma on WS2812; shared photo gamma may additionally
-apply. Do not add another P3 conversion blindly or assume HUB75 calibration
-values suit WS2812. Compare Original palette, neutral controls, primary colors
-and grey ramps before choosing a backend-specific correction. The current
-calibration UI is HUB75-only. Record what was physically tested vs inferred.
+Browser thumbnails are prerecorded, not a calibrated optical preview.
+NeoMatrix applies its own gamma on WS2812. The removed photo-specific gamma
+no longer affects playback. Calibration comparisons use generated charts.
+Do not assume HUB75 calibration values suit WS2812. Compare Original palette,
+neutral controls, primary colors and grey ramps before choosing a backend-
+specific correction. The calibration UI is HUB75-only. Record what was
+physically tested vs inferred.
+
+GIFT NETWORK POLICY
+The giver explicitly wants their saved Wi-Fi networks kept on this device.
+Do not delete them, reset NVS or factory-reset during setup. Add the recipient's
+network alongside them. Never publish the credentials or full-flash backups.
 
 FIRST RESPONSE FROM THE AI
 Report the checked-out version, available tools, discovered device identity

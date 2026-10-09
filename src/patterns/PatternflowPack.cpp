@@ -70,8 +70,8 @@ const PatternflowMetadata PATTERNFLOW_METADATA[PATTERNFLOW_PATTERN_COUNT] = {
   {"Signal Orchard", {"Pulse speed","Trees","Branching depth","Surge"}, {32,20,40,70}, {0x22f6bc,0x3cc7e8,0x7874ff,0xe957b8}},
   {"Whitney — Resonant Orbits", {"Canon speed","Particle count","Rate divergence","Echo length"}, {26,50,75,40}, {0xf4e2b2,0xe18680,0x48c8c1,0x868ee5}},
   {"Whitney — Phase Architecture", {"Motion speed","Strand count","Torsion","Precession"}, {26,45,65,55}, {0xefe4c9,0xd782a6,0x74c9d0,0x9799ed}},
-  {"Photo — Empty slot 1", {"Exposure","Contrast","Black level","Color temperature"}, {50,50,50,50}, {0xbca18d,0x404d61,0x909a9c,0xede8dc}},
-  {"Photo — Empty slot 2", {"Exposure","Contrast","Black level","Color temperature"}, {50,50,50,50}, {0x365c47,0x939d8c,0xe2b79a,0x444955}},
+  {"Removed", {"Unused","Unused","Unused","Unused"}, {0,0,0,0}, {0,0,0,0}}, // Retired ID 56
+  {"Removed", {"Unused","Unused","Unused","Unused"}, {0,0,0,0}, {0,0,0,0}}, // Retired ID 57
   {"Pong Wars", {"Game speed","Tile size","Ball size","Bounce variation"}, {40,33,50,25}, {0xD9E8E3,0xD9E8E3,0x172B36,0x172B36}},
   {"Whitney — Resonant Orbits v2", {"Canon speed","Particle count","Rate divergence","Echo length"}, {26,65,75,40}, {0xf4e2b2,0xe18680,0x48c8c1,0x868ee5}},
   {"Warped Checkerboard — Acid Cathedral", {"Motion speed","Grid density","Arch distortion","Aliasing"}, {28,32,74,55}, {0xff3155,0xffc247,0x22d3c5,0x765dff}},
@@ -230,7 +230,6 @@ float fbm(float x, float y) {
 #include "AdvancedStudies.inc"
 #include "NovaStudies.inc"
 #include "AcidStudies.inc"
-#include "PhotoStudies.inc"
 #include "PongWars.inc"
 #include "Classic08.inc"
 
@@ -267,7 +266,7 @@ void PatternflowPack::render(uint8_t index, uint16_t width, uint16_t height,
   if(index >= 60) { renderAcidPattern(index-60,width,height,deltaTime,p,palette,writer,context); return; }
   if(index == 59) { renderNovaPattern(7,width,height,deltaTime,p,palette,writer,context); return; }
   if(index == 58) { renderPongWars(width,height,deltaTime,p,palette,writer,context); return; }
-  if(index >= 56) { renderPhotoPattern(index-56,width,height,p,rgbPalette,writer,context); return; }
+  if(index >= 56) return; // Retired IDs: never reuse saved variant identities.
   if(index >= 49) { renderNovaPattern(index-49,width,height,deltaTime,p,palette,writer,context); return; }
   if(index >= 46) { renderAdvancedPattern(index-46,width,height,deltaTime,p,palette,writer,context); return; }
   if(index >= 43) { renderWhitneyPattern(index-43,width,height,deltaTime,p,palette,rgbPalette,writer,context); return; }

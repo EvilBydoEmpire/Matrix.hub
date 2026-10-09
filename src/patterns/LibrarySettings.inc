@@ -66,7 +66,7 @@ void ensureImportedRgbPalette(int brightness){
    float r=((i>>8)&15)/15.f,g=((i>>4)&15)/15.f,b=(i&15)/15.f;
    float maximum=max(r,max(g,b)),minimum=min(r,min(g,b)),delta=maximum-minimum,hue=0;
    if(delta>.0001f){if(maximum==r)hue=(g-b)/delta;else if(maximum==g)hue=2+(b-r)/delta;else hue=4+(r-g)/delta;hue/=6;if(hue<0)hue+=1;}
-   if(Soukan::active(control.palette)&&(pfcParams.variant==56||pfcParams.variant==57||delta<.001f)){
+   if(Soukan::active(control.palette)&&delta<.001f){
      // Tonal subjects use luminance, not undefined grey hue; do not multiply
      // their brightness twice. Sort only this transfer ramp, not palette data.
      float light=constrain((r*.2126f+g*.7152f+b*.0722f-.5f)*(control.spread/360.f)+.5f+control.hue/360.f,0.f,1.f);
@@ -77,7 +77,7 @@ void ensureImportedRgbPalette(int brightness){
      if(d>.0001f){if(hi==cr)h=(cg-cb)/d;else if(hi==cg)h=2+(cb-cr)/d;else h=4+(cr-cg)/d;h/=6.f;}
      // Non-photo greys are often a dark canvas, not a tone-mapped subject.
      // Never turn a 6% grey backdrop into a full-strength palette pigment.
-     float value=(pfcParams.variant==56||pfcParams.variant==57)?hi:min(hi,maximum);
+     float value=min(hi,maximum);
      importedRgbPalette[i]=makeColor(h+tuning.hueShift/360.f,hi>.001f?constrain(d/hi*tuning.saturation/100.f,0.f,1.f):0.f,value,brightness);
    }else if(original){
      float shifted=hue*(control.spread/360.f)+(control.hue+tuning.hueShift)/360.f;

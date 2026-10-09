@@ -10,14 +10,16 @@ The renamed firmware uses `matrix-16.local`, `matrix-22.local`, and
 `matrix-64.local`. Devices running older firmware retain their old hostnames
 until updated. Initial provisioning/recovery uses USB; normal updates use OTA.
 
-The active local gallery currently contains **61 patterns**. The older feature
+The active gallery currently contains **59 patterns**. The older feature
 notes below are historical, not a promise that every pattern has received an
 individual small-panel aesthetic pass. Lua package downloads remain planned.
 
-Public snapshots exclude personal photos and use empty photo slots with black
-preview rows. `tools/export_public.py` creates this sanitized source tree without
-altering the owner's local photo assets; never publish a private checkout's
-generated image headers or full-flash backups wholesale.
+Both personal-photo patterns, their image arrays and their preview rows have
+been removed from the project. There are no empty photo cards. Retired IDs stay
+reserved internally so other saved patterns/bookmarks are not renumbered.
+`tools/export_public.py` excludes local caches and backups; never publish
+full-flash backups, which may contain Wi-Fi credentials. Saved Wi-Fi networks
+are intentionally retained on the gifted Matrix.16, at the owner's request.
 
 For sharing new patterns today: fork this repository, develop/test on a branch,
 and submit a pull request. Each recipient installs firmware built for their own
