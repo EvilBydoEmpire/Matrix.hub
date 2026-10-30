@@ -2,12 +2,15 @@
 
 #include <stdint.h>
 
-// Native, resolution-independent adaptations of Patternflow animations. The
-// Patternflow-derived algorithms remain CC-BY-SA-4.0; see THIRD_PARTY_NOTICES.md and the
-// preserved JavaScript sources under patterns/imports/patternflow.
-// Stable IDs include retired slots; the active catalog is separate.
+struct SourceColors;  // Rgb565.h
+
+// The collection: resolution-independent renderers addressed by stable variant
+// IDs. Retired IDs keep an empty row and draw nothing. Patternflow-derived
+// renderers are CC-BY-SA-4.0; docs/THIRD_PARTY_NOTICES.md credits every
+// adaptation.
 constexpr uint8_t PATTERNFLOW_PATTERN_COUNT = 68;
 
+// A control without a label stays at its default.
 struct PatternflowMetadata {
   const char* name;
   const char* controlLabel[4];
@@ -25,10 +28,13 @@ class PatternflowPack {
   void reset(uint8_t index);
   void render(uint8_t index, uint16_t width, uint16_t height, float deltaTime,
               const uint8_t controls[4], const uint16_t palette[256],
-              const uint16_t rgbPalette[4096],
+              const SourceColors& sourceColors,
               PatternflowPixelWriter writer, void* context);
 
  private:
-  float time_[PATTERNFLOW_PATTERN_COUNT] = {};
-
+  // Clocks of the renderers in PatternflowPack.cpp itself, IDs 0–16.
+  static constexpr uint8_t PACK_CLOCKS = 17;
+  float time_[PACK_CLOCKS] = {};
+  // Pendulum Waves' base and spread phases.
+  float pendulumPhase_[2] = {};
 };

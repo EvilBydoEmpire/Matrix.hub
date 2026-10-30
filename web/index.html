@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e6e4da" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121614" media="(prefers-color-scheme: dark)">
+<title>Matrix</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body data-view="playing">
+<header class="bar">
+ <h1 id="deviceTitle">Matrix</h1>
+ <span id="connection" class="connection" role="status" hidden><i></i><span id="connectionNote"></span></span>
+ <button id="deviceButton" class="quiet" type="button" onclick="toggleDeviceView()">Device</button>
+</header>
+<main id="app" inert>
+ <section id="libraryView" class="view" aria-label="Library">
+  <div id="patternGallery" class="gallery" role="group" aria-label="Patterns" onkeydown="moveTileFocus(event)"></div>
+ </section>
+ <section id="playingView" class="view" aria-label="Playing">
+  <div class="now">
+   <canvas id="activePreview" role="img"></canvas>
+   <div><h2 id="activePatternName">Connecting…</h2><p id="activePatternNote" hidden>Test view. Pick a pattern to resume.</p></div>
+  </div>
+  <div class="control">
+   <label for="brightness">Brightness</label><output id="brightnessValue" class="readout" for="brightness"></output>
+   <input id="brightness" type="range" min="0" max="15" step="1" oninput="setBrightness(this.value)">
+  </div>
+  <div class="switchRow cycle">
+   <label for="cycling">Cycle patterns</label>
+   <select id="cycleInterval" aria-label="Cycle interval" onchange="setCycleInterval(this.value)" hidden></select>
+   <input id="cycling" type="checkbox" role="switch" onchange="setCycling(this.checked)">
+  </div>
+  <div id="playingControls">
+   <div id="paramControls" class="controls"></div>
+   <section class="look" aria-labelledby="colorHeading"><h2 id="colorHeading">Colour</h2><div id="colorControls"></div></section>
+   <div class="resetRow"><button class="button" type="button" onclick="resetPattern(this)">Reset to defaults</button></div>
+  </div>
+ </section>
+ <section id="deviceView" class="view device" aria-label="Device">
+  <form class="group" aria-labelledby="scheduleHeading" onchange="editSchedule()" onsubmit="event.preventDefault()">
+   <div class="groupHead"><h2 id="scheduleHeading">Schedule</h2><input id="scheduleEnabled" type="checkbox" role="switch" aria-labelledby="scheduleHeading"></div>
+   <div id="scheduleFields" class="settings">
+    <div class="two"><label class="field">On<input id="scheduleStart" type="time" required></label><label class="field">Off<input id="scheduleEnd" type="time" required></label></div>
+    <div class="two"><label class="field">Fade in<span class="unit" data-unit="s"><input id="scheduleFadeIn" type="number" min="1" max="3600" required></span></label><label class="field">Fade out<span class="unit" data-unit="s"><input id="scheduleFadeOut" type="number" min="1" max="3600" required></span></label></div>
+    <p class="hint">Berlin time. Fading in starts at On, fading out at Off.</p>
+   </div>
+  </form>
+  <section class="group" aria-labelledby="wifiHeading">
+   <h2 id="wifiHeading">Wi-Fi</h2>
+   <div class="settings">
+    <p id="networkInfo"></p>
+    <div id="wifiPick" class="field"><label for="savedWifi">Other saved networks</label><div class="pick"><select id="savedWifi"></select><button id="connectWifi" class="button" type="button" onclick="connectSavedNetwork(this)">Connect</button></div></div>
+    <div class="field">Add a network<div class="two"><input id="newSsid" type="text" maxlength="32" aria-label="Network name" placeholder="Name" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><input id="newPass" type="password" maxlength="64" aria-label="Password" placeholder="Password" autocomplete="off"></div></div>
+    <button id="saveWifi" class="button" type="button" onclick="addNetwork()">Save network</button>
+    <p id="wifiMessage" class="hint" role="status" aria-live="polite" hidden></p>
+    <button id="forgetWifi" class="quiet danger" type="button" onclick="resetWifi(this)">Forget all networks</button>
+   </div>
+  </section>
+  <section id="calibrationPanel" class="group" aria-labelledby="calibrationHeading" hidden>
+   <h2 id="calibrationHeading">Display tuning</h2>
+   <div class="settings">
+    <p class="hint">Show the test chart and lower the strongest colour until white looks neutral. The balance applies to every pattern.</p>
+    <div class="switchRow"><label for="testChart">Test chart</label><input id="testChart" type="checkbox" role="switch" onchange="command('setTestChart',{value:this.checked})"></div>
+    <div class="controls balance">
+     <div class="control"><label for="calR">Red</label><output class="readout" for="calR"></output><input id="calR" type="range" min="0" max="100" oninput="editBalance(this)"></div>
+     <div class="control"><label for="calG">Green</label><output class="readout" for="calG"></output><input id="calG" type="range" min="0" max="100" oninput="editBalance(this)"></div>
+     <div class="control"><label for="calB">Blue</label><output class="readout" for="calB"></output><input id="calB" type="range" min="0" max="100" oninput="editBalance(this)"></div>
+    </div>
+    <button class="quiet" type="button" onclick="resetColorCalibration(this)">Reset white balance</button>
+   </div>
+  </section>
+  <section class="group" aria-labelledby="aboutHeading">
+   <h2 id="aboutHeading">About</h2>
+   <dl id="about" class="about"></dl>
+  </section>
+ </section>
+</main>
+<nav class="tabs" aria-label="Views"><button type="button" data-view="playing" onclick="go('playing')">Playing</button><button type="button" data-view="library" onclick="go('library')">Library</button><button type="button" data-view="device" onclick="go('device')">Device</button></nav>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="palettes.js"></script>
+<script src="gallery.js"></script>
+<script src="patterns.js"></script>
+<script src="net.js"></script>
+<script src="previews.js"></script>
+<script src="library.js"></script>
+<script src="controls.js"></script>
+<script src="device.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,14 +1,15 @@
-# Arduino and PlatformIO build output
-build/
+# Build output and local state
 .pio/
-.pioenvs/
-.piolibdeps/
 .venv/
-tools/matrix-audio-mac/dist/
+.local/
+.playwright-cli/
+LOCAL.md
 
 # Local editor and operating-system files
 .DS_Store
 .vscode/
+.idea/
+*.swo
 *.swp
 *.tmp
 
@@ -16,12 +17,13 @@ tools/matrix-audio-mac/dist/
 secrets.h
 *.pem
 *.key
+.env
+.env.*
+*.p12
+*.pfx
 
-# Private/local development state. Public export supplies sanitized photo assets.
+# Private/local development state
 __pycache__/
 *.pyc
-graphify-out/
-src/platform/graphify-out/
-*.mp3
 *.HEIC
 *.heic

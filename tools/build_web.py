@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+"""Bundle web/ into self-contained pages and embed them gzipped in the firmware.
+
+Regenerates web/palettes.js from src/patterns/Palettes.h and web/gallery.js from
+src/patterns/PatternCatalog.h, then src/generated/WebAssets.h from web/index.html
+and web/setup.html with every stylesheet and script inlined. --check reports
+stale outputs without writing.
+"""
+import argparse
+import gzip
+import hashlib
+import json
+import logging
+import pathlib
+import re
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+WEB = ROOT / 'web'
+PALETTES_H = ROOT / 'src/patterns/Palettes.h'
+PALETTES_JS = WEB / 'palettes.js'
+CATALOG_H = ROOT / 'src/patterns/PatternCatalog.h'
+GALLERY_JS = WEB / 'gallery.js'
+HEADER = ROOT / 'src/generated/WebAssets.h'
+# Symbol, page, compressed budget in bytes.
+PAGES = (('APP', 'index.html', 32 * 1024), ('SETUP', 'setup.html', 4 * 1024))
+STYLESHEET = re.compile(r'<link rel="stylesheet" href="([\w.-]+)">')
+SCRIPT = re.compile(r'<script src="([\w.-]+)"></script>')
+log = logging.getLogger('build_web')
+
+
+def palette_table() -> list:
+    """Offered palettes as [id, name, stops] in display order; Original has no fixed stops."""
+    source = PALETTES_H.read_text(encoding='utf-8')
+    body = lambda start: source.split(start, 1)[1].split('};', 1)[0]
+    names = [None if token == 'nullptr' else token.strip('"') for token in re.findall(r'"[^"]+"|nullptr', body('Names[Count] = {'))]
+    stops = [re.findall(r'0x([0-9A-Fa-f]{6})', group) for group in re.findall(r'\{([^{}]*)\}', body('Stops[Count][4] = {'))]
+    order = [int(n) for n in re.findall(r'\d+', body('Order[] = {'))]
+    offered = [i for i, name in enumerate(names) if name]
+    original = names.index('Original')
+    if (len(names) != len(stops) or sorted(order) != offered or order[-1] != original or stops[original]
+            or not all(len(stops[i]) == 4 for i in offered if i != original)):
+        raise ValueError('Palettes.h: expected four stops per named palette and every one of them once in Order')
+    return [[i, names[i], ['#' + s.upper() for s in stops[i]] or None] for i in order]
+
+
+def palettes_js() -> str:
+    entries = [json.dumps(entry, separators=(',', ':')) for entry in palette_table()]
+    return ('// Generated from src/patterns/Palettes.h by tools/build_web.py.\n'
+            '// [id, name, stops] in display order; Original has per-pattern stops.\n'
+            'const palettes=[' + ','.join(entries) + '];\n')
+
+
+def gallery_order() -> list:
+    """Gallery keys in the firmware's order: n + native engine ID, then p + collection variant ID."""
+    source = CATALOG_H.read_text(encoding='utf-8')
+    ids = lambda name: re.search(name + r'\[\w*\]=\{([^}]*)\}', source).group(1).split(',')
+    return [f'n{int(v)}' for v in ids('CORE_PATTERN_IDS')] + [f'p{int(v)}' for v in ids('COLLECTION_PATTERN_IDS')]
+
+
+def gallery_js() -> str:
+    return ('// Generated from src/patterns/PatternCatalog.h by tools/build_web.py.\n'
+            '// Gallery keys in order: n + native engine ID, p + collection variant ID.\n'
+            'const galleryOrder=' + json.dumps(gallery_order(), separators=(',', ':')) + ';\n')
+
+
+GENERATED = ((PALETTES_JS, palettes_js), (GALLERY_JS, gallery_js))
+
+
+def bundle(page: str) -> str:
+    """Return one page with its stylesheets and scripts inlined in place."""
+    def inline(name: str) -> str:
+        return (WEB / name).read_text(encoding='utf-8')
+
+    def script(match: re.Match) -> str:
+        code = inline(match[1])
+        if '</script' in code.lower():
+            raise ValueError(f'{match[1]} must not contain a closing script tag')
+        return '<script>\n' + code + '</script>'
+
+    html = STYLESHEET.sub(lambda match: '<style>\n' + inline(match[1]) + '</style>', inline(page))
+    return SCRIPT.sub(script, html)
+
+
+def c_array(data: bytes) -> str:
+    return ',\n'.join('  ' + ','.join(f'0x{b:02X}' for b in data[i:i + 16]) for i in range(0, len(data), 16))
+
+
+def source_digest() -> str:
+    """Hash the bundles and this tool, so a change to either regenerates the header."""
+    digest = hashlib.sha256(pathlib.Path(__file__).read_bytes())
+    for _, page, _ in PAGES:
+        digest.update(bundle(page).encode('utf-8'))
+    return digest.hexdigest()
+
+
+def render_header() -> str:
+    parts = []
+    for symbol, page, budget in PAGES:
+        text = bundle(page).encode('utf-8')
+        packed = gzip.compress(text, compresslevel=9, mtime=0)
+        if len(packed) > budget:
+            raise ValueError(f'{page}: {len(packed)} compressed bytes exceed the {budget}-byte budget')
+        etag = hashlib.sha256(text).hexdigest()[:16]
+        parts.append(f'constexpr char {symbol}_ETAG[] = "\\"{etag}\\"";\n'
+                     f'constexpr size_t {symbol}_HTML_GZ_SIZE = {len(packed)};  // {len(text)} bytes uncompressed\n'
+                     f'const uint8_t {symbol}_HTML_GZ[] PROGMEM = {{\n{c_array(packed)}\n}};\n')
+    return ('#pragma once\n'
+            '// Generated by tools/build_web.py from web/; edit those sources instead.\n'
+            f'// Source SHA-256: {source_digest()}\n'
+            '#include <Arduino.h>\n\n' + '\n'.join(parts))
+
+
+def stale() -> list[str]:
+    outdated = [str(path.relative_to(ROOT)) for path, render in GENERATED
+                if not path.exists() or path.read_text(encoding='utf-8') != render()]
+    recorded = re.search(r'Source SHA-256: (\w+)', HEADER.read_text(encoding='utf-8')) if HEADER.exists() else None
+    if not recorded or recorded[1] != source_digest():
+        outdated.append(str(HEADER.relative_to(ROOT)))
+    return outdated
+
+
+def write() -> None:
+    """Regenerate outdated outputs; unchanged sources leave every file untouched."""
+    for path, render in GENERATED:
+        expected = render()
+        if not path.exists() or path.read_text(encoding='utf-8') != expected:
+            path.write_text(expected, encoding='utf-8')
+            log.info('Wrote %s', path.relative_to(ROOT))
+    if stale():
+        HEADER.write_text(render_header(), encoding='utf-8')
+        log.info('Wrote %s', HEADER.relative_to(ROOT))
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--check', action='store_true', help='fail if generated files are stale')
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    if args.check:
+        outdated = stale()
+        for path in outdated:
+            log.error('Stale: %s (run tools/build_web.py)', path)
+        return 1 if outdated else 0
+    write()
+    for _, page, budget in PAGES:
+        size = len(gzip.compress(bundle(page).encode('utf-8'), compresslevel=9, mtime=0))
+        log.info('%s: %d bytes compressed (budget %d)', page, size, budget)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -1,7 +1,7 @@
 #pragma once
 
-// Physical mounting orientation, separate from each pattern's artistic angle.
-// Apply at the final output boundary, so direct framebuffers and Lua agree.
+// Physical mounting orientation of the HUB75 panel, applied as each frame
+// leaves for the panel.
 #ifndef MATRIX_OUTPUT_ROTATION
 #define MATRIX_OUTPUT_ROTATION 1
 #endif

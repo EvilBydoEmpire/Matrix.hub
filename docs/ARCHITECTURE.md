@@ -1,118 +1,26 @@
 # Architecture
 
-## Design principles
+## Rendering
 
-1. Preserve the known-working MatrixPortal S3 firmware while migrating incrementally.
-2. Keep normal device operation local and account-free.
-3. Share the pattern model and user experience across supported ESP32 targets.
-4. Keep hardware-specific display, pin, memory, and partition details in build profiles.
-5. Use Lua for animation logic and composition; keep expensive pixel loops in C++.
-6. Retain built-in C++ fallback patterns so a filesystem or script failure cannot leave the device unusable.
-7. Pause normal rendering and display a dedicated progress frame during filesystem writes and firmware updates.
+Native engines live in `src/patterns/NativeEngines.cpp` and collection variants in `src/patterns/PatternflowPack.cpp` and its `.inc` modules. A renderer receives the dimensions, elapsed time, its controls, cached colour tables and a pixel writer, so the host renders thumbnails and runs tests with the code the firmware runs. Every renderer shares the sine table and approximations in `src/patterns/FastMath.h` and the colour helpers in `src/patterns/Rgb565.h`. Physical panel orientation applies as frames leave for the panel. Pattern clocks are floats, so a pattern that has played for an hour restarts behind the same fade cycling uses, before rounding can make its motion stutter.
 
-## Proposed component boundaries
+The ESP32 runs code from flash through a 32 KB two-way cache per core. When a pixel loop calls code whose cache lines collide with its own, every pixel refills the cache, and on Matrix.16 such a pattern draws several times slower, depending only on where the linker placed each function. Code that a pattern calls for every pixel therefore inlines into it or runs from internal RAM: the `FastMath.h` and `Rgb565.h` helpers always inline, and the pixel writers, `sourceColor` and the collection's canvas, line and trail helpers carry `IRAM_ATTR`. Floats divide in software and libm runs from flash as well, so per-pixel code hoists reciprocals out of its loops and rounds with `floorInt` and `roundInt`. A collection pattern that keeps a canvas or simulation allocates it while it plays and claims it through `claimCanvas`; a failed allocation records no owner, so the next frame tries again.
 
-```text
-Application
-├── DeviceProfile
-├── DisplayBackend
-│   ├── ProtomatterBackend
-│   ├── Ws2812Backend
-│   └── Max7219Backend
-├── Canvas / Graphics API
-├── PatternEngine
-│   ├── BuiltInPattern
-│   └── LuaPattern
-├── ParameterStore
-├── PlaylistService
-├── PatternStorage
-├── PatternCatalogClient
-├── FirmwareUpdateService
-├── WifiManager
-└── WebApplication
-```
+Palettes are cached per pattern, so colour changes add no per-pixel work. WS2812 patterns render full-scale RGB565 and `LedEncoder` turns it into LED bytes through brightness and the white balance ([HARDWARE_PROFILES.md](HARDWARE_PROFILES.md)); HUB75 colours carry brightness from their palette tables, and its backend applies the white balance to every frame. RGB565 gives green twice the steps of red and blue, so `src/patterns/Rgb565.h` rounds dim green on their grid, and a fading colour never leaves green alone lit.
 
-The pattern engine draws through `Canvas`, not directly through Protomatter, FastLED/NeoPixel, or MAX7219 libraries.
+## State and storage
 
-## Display capabilities
+- NVS holds the Wi-Fi networks in `wifi-list` and everything else in `matrix-cfg`: playback, the schedule, brightness, the last picked pattern, the white balance and a record for each edited pattern.
+- Firmware flash holds the patterns, the gzipped pages and the preview atlas.
 
-A backend reports capabilities in addition to width and height:
+`PatternStore::Version` in `src/patterns/PatternStore.h` names the layout of `matrix-cfg`. At boot, any other version erases the namespace and the Wi-Fi driver's own store, which this firmware keeps in RAM, so the matrix starts from defaults and keeps only its networks and white balance. Raise the version whenever the layout changes; nothing converts old settings.
 
-```cpp
-struct DisplayCapabilities {
-  uint16_t width;
-  uint16_t height;
-  bool rgb;
-  uint8_t colorDepth;
-  float aspect;
-};
-```
+An edited pattern keeps one record under `p` and its stable ID: palette, Saturation, the four stops of its palette as saved, so later changes to a compiled palette leave it alone, and its engine's controls. A pattern without a record plays its compiled defaults, so changed defaults reach it with the next update, and Reset deletes the record. Edits save 3 s after they settle, before another pattern starts and when an OTA update begins. A failed save retries every 30 s, and RAM holds each pattern's unsaved edits until then, even after another pattern starts.
 
-Pattern manifests can require RGB output, minimum dimensions, or an aspect-ratio range. A backend may quantize RGB output for monochrome displays, but the catalog should not claim that every visual is equally suitable for every panel.
+## Control and network
 
-## Coordinate systems
+`/control` returns state, including the firmware's commit, and accepts commands; `/diagnostics` reports timing, memory, uptime and OTA readiness, and `/preview-atlas.png` serves the thumbnails. `/setup` is the Wi-Fi setup page, backed by `/wifi/scan` and `/wifi/add`, and `/wifi/reset` forgets every network. A scan runs in the background while frames play: `/wifi/scan` answers `scanning` until the list is ready, and the list answers until 30 s after its scan began, so every page waiting on it receives it; `?again` always starts a new scan. Writes are accepted only as `application/json`, which browsers send across origins only after a preflight the matrix never answers, so other web pages cannot issue commands. Every applied command raises a state revision, which the app watches through `/diagnostics`; [APP.md](APP.md) covers the app side.
 
-Patterns receive:
+The matrix plays from the moment it starts and joins Wi-Fi in the background: the saved network it joined last, then the others, 7 s each; Connect in the app picks the next one. Once joined, the matrix starts mDNS and the OTA receiver and sets its clock from NTP in the Europe/Berlin time zone; the schedule waits for the first synced reading and then jumps straight to the right level. When no saved network answers in that first round, or after 60 s without a connection, the firmware opens its captive setup network. While it is open, the saved networks are retried in the background every minute, and the setup network closes once one answers. A phone on the setup network or a network scan stops an attempt at once, and the next round waits until a minute after the phone leaves, because an attempt moves the access point's channel and makes scans fail. The USB bridge carries the same commands over serial. Serial lines are capped at 1,023 bytes; a longer line is dropped whole, and an over-long command is answered with status 413. The WROOM queues replies in a 4 KB transmit buffer, so frames keep playing while the UART sends them.
 
-- Pixel coordinates for exact drawing
-- Relative coordinates `u` and `v` in the range 0…1
-- Centered isotropic coordinates scaled by half of the shorter display dimension
-
-The isotropic mapping preserves circles on rectangular displays. A 64×16 display is therefore approximately `x = -4…4`, `y = -1…1`.
-
-## Pattern packages
-
-Installed patterns use a package directory rather than embedding discovery metadata in executable Lua:
-
-```text
-/patterns/aurora-rings/
-├── manifest.json
-└── main.lua
-```
-
-`manifest.json` describes identity, version, engine compatibility, display requirements, and parameters. `main.lua` provides lifecycle callbacks such as initialization and frame rendering.
-
-### Palette parameters
-
-Color gradients are firmware resources rather than Lua source data. Pattern
-metadata stores only a palette ID, base hue, and hue spread. The firmware turns
-those values into a cached 256-entry native display palette. Lua patterns will
-use `color.palette(position)` while the runtime supplies the active cached
-palette from manifest/UI parameters.
-
-This allows palettes with multiple allowed hue ranges and gradients without
-embedding RGB stop arrays in every pattern. It also keeps the per-pixel path in
-C++ and makes one Lua file portable across RGB565 HUB75, RGB WS2812, and
-monochrome palette-mapping backends.
-
-Downloads are written to a staging path. The device validates size, digest, manifest, compatibility, and Lua loading before replacing an installed version. Installed patterns continue to work offline.
-
-## Lua runtime rules
-
-- A memory-limited allocator is mandatory.
-- Each callback has an instruction and execution-time budget.
-- Calls are protected and errors are reported without crashing the firmware.
-- Repeatedly failing patterns are quarantined and replaced by a fallback pattern.
-- Filesystem, operating-system, package-loading, debug, and network libraries are unavailable to scripts.
-- Direct pixel drawing is supported for sparse effects.
-- Full-frame effects and expensive primitives run in C++ through `gfx` and `fx` APIs.
-- Palette generation and lookup run in C++; Lua scripts pass normalized palette
-  positions rather than calculating RGB gradients per pixel.
-
-## Storage responsibilities
-
-- Preferences/NVS: Wi-Fi networks, device identity, global settings, active profile
-- LittleFS: installed pattern packages, pattern parameter values, catalog cache, playlists
-- Firmware image: built-in fallback patterns and a fallback web interface
-
-Settings are keyed by stable pattern and parameter IDs rather than raw C++ struct layouts.
-
-## Update behavior
-
-Pattern and firmware installation is an explicit maintenance state:
-
-1. Stop normal pattern execution.
-2. Render an `Installing…` or `Updating…` status frame.
-3. Perform download, validation, and flash/filesystem writes.
-4. Resume playback or reboot when complete.
-5. Preserve the previous working pattern or firmware on failure.
+HTTP and OTA are unauthenticated, so they belong on a trusted local network and never behind a router port forward. OTA pauses rendering and shows a dim update notice: HUB75 output stops during flash writes, while WS2812 holds its last frame. A successful update restarts without touching partitions; settings change only when their version does. Every restart saves edits that are still waiting to settle.

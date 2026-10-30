@@ -1,5 +1,5 @@
-// User-supplied John Whitney-inspired sketch, 2026-10-03.
-// Formatting normalized. Author and license not supplied.
+// John Whitney-inspired sketch, supplied privately on 2026-10-03 without an
+// author or licence. Formatting normalised.
 let bg = "#171815";
 let palette = ["#FBFAF8", "#F3EA83", "#C85D4D", "#92302F", "#568C44", "#4A64C7", "#CF6DA0"];
 let sqrs = [];

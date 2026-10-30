@@ -1,5 +1,6 @@
 // Pong Wars: native adaptation of Koen van Gilst's MIT-licensed reference.
-// Source/notice: patterns/imports/pong-wars/LICENSE and THIRD_PARTY_NOTICES.md.
+// Source/notice: patterns/imports/pong-wars/LICENSE and
+// docs/THIRD_PARTY_NOTICES.md.
 // Same two opposing balls / territory conversion; new fixed-step collision
 // handling and small bit-packed grid suited to 16/22/64-pixel ESP32 panels.
 namespace {
@@ -7,9 +8,9 @@ struct PongBall{float x,y,vx,vy;};
 uint8_t pongTiles[128]{}; // At most 32*32 cells; 1 bit per territory.
 PongBall pongBalls[2]{};
 int pongGrid=0;
-float pongCarry=0;
+float pongCarry=FIRST_CARRY;
 uint32_t pongSeed=0x607D123BU;
-void resetPongWars(){pongGrid=0;pongCarry=0;pongSeed=0x607D123BU;}
+void resetPongWars(){pongGrid=0;pongCarry=FIRST_CARRY;pongSeed=0x607D123BU;}
 inline int pongOwner(int x,int y){int n=y*pongGrid+x;return (pongTiles[n>>3]>>(n&7))&1;}
 inline void pongSetOwner(int x,int y,int owner){int n=y*pongGrid+x;uint8_t mask=uint8_t(1U<<(n&7));
  if(owner)pongTiles[n>>3]|=mask;else pongTiles[n>>3]&=uint8_t(~mask);}
@@ -56,29 +57,23 @@ void stepPongWars(float speed,float radius,float chaos){
 }
 void renderPongWars(uint16_t W,uint16_t H,float dt,const uint8_t p[4],
  const uint16_t pal[256],PatternflowPixelWriter writer,void*context){
- if(remixIndex!=400||remixW!=W||remixH!=H){
-  resetRemixPattern();resetPongWars();remixW=W;remixH=H;remixIndex=400;
-  remixPixels=(uint16_t*)calloc(W*H,sizeof(uint16_t));
- }
- if(!remixPixels)return;
- int grid=8+(100-p[1])*24/100;
+ if(!claimCanvas(500,W,H,resetPongWars))return;
+ int grid=scaledCount(100-p[1],8,32,4,min(W,H)/64.f);
  if(grid!=pongGrid)initializePongBoard(grid);
  float radius=mapControl(p[2],.25f,.7f),speed=mapControl(p[0],.1f,1.5f),chaos=unit(p[3]);
- pongCarry+=constrain(dt,0.f,.1f)*240.f;
- int ticks=min(24,int(pongCarry+1e-5f));pongCarry=max(0.f,pongCarry-ticks);
- for(int i=0;i<ticks;i++)stepPongWars(speed,radius,chaos);
+ for(int tick=fixedSteps(pongCarry,dt,240);tick>0;tick--)stepPongWars(speed,radius,chaos);
  const uint16_t territory[2]={pal[0],pal[128]};
  int columns[64];for(int x=0;x<W;x++)columns[x]=x*grid/W;
  for(int y=0;y<H;y++){int row=y*grid/H;for(int x=0;x<W;x++)remixPixels[y*W+x]=territory[pongOwner(columns[x],row)];}
  for(int team=0;team<2;team++){
-  // Opposite-color balls on each home territory, as in the reference. Source
-  // over (not additive/lighten) is essential for the DARK ball to be visible.
+  // Opposite-colour balls on each home territory, as in the reference; source-over
+  // blending keeps the dark ball visible.
   float x=pongBalls[team].x*W/grid-.5f,y=pongBalls[team].y*H/grid-.5f,r=radius*min(W,H)/grid;
   uint16_t color=pal[team?64:192];
   for(int py=max(0,floorInt(y-r-.5f));py<=min(int(H)-1,int(ceilf(y+r+.5f)));py++)
    for(int px=max(0,floorInt(x-r-.5f));px<=min(int(W)-1,int(ceilf(x+r+.5f)));px++)
-    whitneyOver(px,py,color,clamp01(r+.5f-fastHypotApprox(px-x,py-y)));
+    remixOver(px,py,color,clamp01(r+.5f-fastHypot(px-x,py-y)));
  }
- for(int y=0;y<H;y++)for(int x=0;x<W;x++)writer(context,x,y,remixPixels[y*W+x]);
+ flushCanvas(writer,context);
 }
 }

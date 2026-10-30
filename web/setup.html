@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matrix Wi-Fi</title>
+<style>
+:root{color-scheme:light;--bg:#e6e4da;--input:#f3f1e8;--text:#1c2120;--muted:#5a615b;--a:#b14117;--accentInk:#fff;--bad:#b3262f}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#121614;--input:#202622;--text:#e4eadb;--muted:#99a494;--a:#d2ed72;--accentInk:#121614;--bad:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace}
+main{max-width:420px;margin:auto;padding:40px 20px}
+h1{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:20px}
+h1:before{content:"";flex:none;width:14px;height:14px;background:radial-gradient(circle,var(--a) 1.6px,transparent 1.9px) 0 0/5px 5px}
+p{margin:0 0 24px;color:var(--muted)}
+form{display:grid;gap:14px}
+label{display:grid;gap:6px;font-size:13px;color:var(--muted)}
+input,select,button{min-height:44px;font:inherit;color:var(--text)}
+input,select{width:100%;padding:8px 12px;border:2px solid var(--text);border-radius:0;background:var(--input);font-size:16px}
+button{border:2px solid var(--text);border-radius:0;background:var(--input);box-shadow:3px 3px 0 var(--text);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+button:active{box-shadow:none;transform:translate(3px,3px)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button[type=submit]{margin-top:6px;background:var(--a);color:var(--accentInk)}
+:focus-visible{outline:2px dashed var(--a);outline-offset:3px}
+#msg{min-height:24px;margin:18px 0}
+a{color:var(--a);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+<h1>Wi-Fi for your matrix</h1>
+<p>Choose a network. The matrix restarts and joins it.</p>
+<form onsubmit="event.preventDefault();save()">
+ <label>Network<select id="ssid"><option value="">Scanning…</option></select></label>
+ <label>Or type its name<input id="manual" maxlength="32" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
+ <label>Password<input id="pass" type="password" maxlength="64" autocomplete="off"></label>
+ <button id="join" type="submit">Join</button>
+ <button type="button" onclick="scan(true)">Scan again</button>
+</form>
+<p id="msg" role="status" aria-live="polite"></p>
+<a href="/">Open the app</a>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function say(text,ok=true){$('msg').textContent=text;$('msg').style.color=ok?'':'var(--bad)'}
+// The matrix scans while it keeps playing; ask every half second until the list is ready.
+async function scan(again){
+ const select=$('ssid');say('Looking for networks…');
+ try{
+  let d;
+  for(let tries=0;(d=await (await fetch('/wifi/scan'+(again&&!tries?'?again=1':''))).json()).scanning;tries++){
+   if(tries>=40)throw new Error();await new Promise(resolve=>setTimeout(resolve,500));
+  }
+  if(!d.success)throw new Error();
+  select.replaceChildren(new Option('Choose a network',''),...d.networks.map(n=>new Option(n.ssid+(n.secure?' 🔒':''),n.ssid)));
+  say(d.networks.length?'':'No networks found. Type the name instead.');
+ }catch(e){select.replaceChildren(new Option('Scan failed',''));say('Scan failed. Type the network name instead.',false)}
+}
+async function save(){
+ const join=$('join'),ssid=$('manual').value.trim()||$('ssid').value;if(join.disabled)return;if(!ssid){say('Choose or type a network name.',false);return}
+ join.disabled=true;say('Saving…');let saved=false;
+ try{
+  const r=await fetch('/wifi/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid,password:$('pass').value,restart:true})}),d=await r.json();
+  if(!r.ok||!d.success)throw new Error(d.message||'The matrix did not confirm the network.');
+  say('Saved. The matrix restarts and joins “'+ssid+'”. Switch to that network to reach it again.');saved=true;
+ }catch(e){say(e.message,false)}
+ finally{join.disabled=saved}
+}
+scan();
+</script>
+</body>
+</html>

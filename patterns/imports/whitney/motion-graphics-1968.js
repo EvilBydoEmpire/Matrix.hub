@@ -1,4 +1,4 @@
-// User-supplied sketch, formatting normalized from chat (2026-10-03).
+// Sketch supplied privately on 2026-10-03. Formatting normalised.
 // Recreating 'Experiments in Motion Graphics', 1968, by John Whitney.
 // Original artwork: https://www.youtube.com/watch?v=jIv-EcX9tUs&t=264s
 // Recreated by Kenny Kim. No license statement was supplied with this sketch.

@@ -1,5 +1,5 @@
 #pragma once
-#if defined(MATRIX_HUB75_DMA)
+#if !defined(MATRIX_PROFILE_WS2812)
 #include <Adafruit_GFX.h>
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #include <driver/pcnt.h>
@@ -9,19 +9,21 @@
 #include <soc/lcd_cam_struct.h>
 #include "PanelOrientation.h"
 
-// An RGB565 canvas preserves existing renderers, fades and preview capture.
-// Only show() converts it to the independent double-buffered DMA bitplanes.
-// Kept behind a separate build flag; the normal Protomatter build is unchanged.
+// MatrixPortal S3 driving a 64x64 HUB75 panel through the I2S DMA driver.
+// Patterns draw into an RGB565 canvas; show() rotates it into the panel's
+// double-buffered four-bit DMA bitplanes.
 class DmaMatrix : public GFXcanvas16 {
   class Panel : public MatrixPanel_I2S_DMA {
    public:
     using MatrixPanel_I2S_DMA::MatrixPanel_I2S_DMA;
     void restartOutput(){dma_bus.dma_transfer_start();}
   };
+  // Output enable, and row address E, which also clocks the refresh counter.
+  static constexpr int OE_PIN=14,ROW_E_PIN=21;
   Panel* panel_=nullptr;
   bool running_=false,counterReady_=false;
   static void blank(){
-    pinMode(14,OUTPUT);digitalWrite(14,HIGH);
+    pinMode(OE_PIN,OUTPUT);digitalWrite(OE_PIN,HIGH);
   }
  public:
   DmaMatrix():GFXcanvas16(64,64){}
@@ -29,11 +31,10 @@ class DmaMatrix : public GFXcanvas16 {
     return ((r&0xf8)<<8)|((g&0xfc)<<3)|(b>>3);
   }
   bool begin(){
-    static_assert(MATRIX_COLOR_DEPTH==4,"DMA candidate validated at four bits only");
-    static_assert(S3_LCD_DIV_NUM==8,"Use the validated exact 20 MHz divider");
+    static_assert(S3_LCD_DIV_NUM==8,"The panel is tuned for the 20 MHz divider");
     blank();if(!getBuffer())return false;
     pcnt_config_t counter={};
-    counter.pulse_gpio_num=21;counter.ctrl_gpio_num=PCNT_PIN_NOT_USED;
+    counter.pulse_gpio_num=ROW_E_PIN;counter.ctrl_gpio_num=PCNT_PIN_NOT_USED;
     counter.channel=PCNT_CHANNEL_0;counter.unit=PCNT_UNIT_0;
     counter.pos_mode=PCNT_COUNT_INC;counter.neg_mode=PCNT_COUNT_DIS;
     counter.lctrl_mode=PCNT_MODE_KEEP;counter.hctrl_mode=PCNT_MODE_KEEP;
@@ -41,7 +42,7 @@ class DmaMatrix : public GFXcanvas16 {
     counterReady_=pcnt_unit_config(&counter)==ESP_OK;
     if(counterReady_){pcnt_counter_pause(PCNT_UNIT_0);pcnt_counter_clear(PCNT_UNIT_0);}
     HUB75_I2S_CFG cfg(64,64,1);
-    cfg.gpio={42,41,40,38,39,37,45,36,48,35,21,47,14,2};
+    cfg.gpio={42,41,40,38,39,37,45,36,48,35,ROW_E_PIN,47,OE_PIN,2}; // R1 G1 B1 R2 G2 B2, A-E, latch, OE, clock
     cfg.double_buff=true;cfg.setPixelColorDepthBits(4);
     cfg.i2sspeed=HUB75_I2S_CFG::HZ_20M;cfg.min_refresh_rate=1;
     // The rotated panel's top edge corresponds to a physical shift column.
@@ -49,11 +50,11 @@ class DmaMatrix : public GFXcanvas16 {
     cfg.latch_blanking=2;cfg.clkphase=false;
     panel_=new Panel(cfg);
     if(!panel_ || !panel_->begin()){blank();return false;}
-    // Deliberately dim experimental profile, same OE duty as the validated
-    // probe. Independent of the saved per-pattern brightness values.
+    // Fixed output-enable duty tuned on the reference panel; pattern
+    // brightness is applied while rendering.
     panel_->setBrightness8(80);
     // Do not use gpio_set_direction here: IDF 4.4 disconnects LCD output.
-    if(counterReady_){gpio_ll_input_enable(&GPIO,GPIO_NUM_21);gpio_pullup_dis(GPIO_NUM_21);
+    if(counterReady_){gpio_ll_input_enable(&GPIO,(gpio_num_t)ROW_E_PIN);gpio_pullup_dis((gpio_num_t)ROW_E_PIN);
       pcnt_counter_clear(PCNT_UNIT_0);pcnt_counter_resume(PCNT_UNIT_0);}
     running_=true;fillScreen(0);show();return true;
   }
@@ -73,7 +74,7 @@ class DmaMatrix : public GFXcanvas16 {
   }
   void resume(){
     if(!panel_ || running_)return;
-    esp_rom_gpio_connect_out_signal(14,LCD_DATA_OUT0_IDX+7,false,false);
+    esp_rom_gpio_connect_out_signal(OE_PIN,LCD_DATA_OUT0_IDX+7,false,false);
     panel_->restartOutput();running_=true;
     if(counterReady_){pcnt_counter_clear(PCNT_UNIT_0);pcnt_counter_resume(PCNT_UNIT_0);}
     show();
